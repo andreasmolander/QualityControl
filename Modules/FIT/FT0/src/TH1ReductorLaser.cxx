@@ -34,7 +34,6 @@ void TH1ReductorLaser::update(TObject* obj)
   if (auto histo = dynamic_cast<TH2F*>(obj)) {
     int channel = -1;
     sscanf(histo->GetName(), "%*[^0-9]%d", &channel);
-    std::cerr << histo << std::endl;
     if (channel < NChannel) {
       for (int ichannel = 0; ichannel < NChannel; ichannel++) {
         const int bin = ichannel + 1;
@@ -49,8 +48,9 @@ void TH1ReductorLaser::update(TObject* obj)
       float stdv = 0;
       if (bc_projection->GetEntries() > 1000) {
         stdv = bc_projection->GetStdDev();
-        if (stdv < 0.5)
+        if (stdv < 0.5) {
           stdv = 0.5;
+        }
         ibc = bc_projection->GetMean() - 2. * stdv;
         ibc_max = bc_projection->GetMean() + 2. * stdv;
       }
@@ -98,4 +98,3 @@ void TH1ReductorLaser::update(TObject* obj)
 }
 }
 } // namespace o2::quality_control_modules::ft0
-// ILOG(Warning)<<histo->GetName()<<" entries: "<< bc_projection->GetEntries()<<" channel: "<<channel<<" ibc: "<<ibc<<" ibc_max: "<<ibc_max<<ENDM;

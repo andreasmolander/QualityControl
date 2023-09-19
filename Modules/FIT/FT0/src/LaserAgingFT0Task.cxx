@@ -9,7 +9,7 @@
 // granted to it by virtue of its status as an Intergovernmental Organization
 // or submit itself to any jurisdiction.
 /// \file   LaserAgingFT0Task.cxx
-/// \author My Name
+/// \author Sandor Lokos
 ///
 
 #include <TCanvas.h>
@@ -33,10 +33,7 @@ LaserAgingFT0Task::~LaserAgingFT0Task()
 
 void LaserAgingFT0Task::initialize(o2::framework::InitContext& /*ctx*/)
 {
-  // THUS FUNCTION BODY IS AN EXAMPLE. PLEASE REMOVE EVERYTHING YOU DO NOT NEED.
-  ILOG(Debug, Devel) << "initialize LaserAgingFT0Task" << ENDM; // QcInfoLogger is used. FairMQ logs will go to there as well.
-  ILOG(Debug, Support) << "Debug" << ENDM;                      // QcInfoLogger is used. FairMQ logs will go to there as well.
-  ILOG(Info, Support) << "Info" << ENDM;                        // QcInfoLogger is used. FairMQ logs will go to there as well.
+  ILOG(Debug, Devel) << "initialize LaserAgingFT0Task" << ENDM;
 
   // this is how to get access to custom parameters defined in the config file at qc.tasks.<task_name>.taskParameters
   if (auto param = mCustomParameters.find("myOwnKey"); param != mCustomParameters.end()) {
@@ -99,19 +96,19 @@ void LaserAgingFT0Task::initialize(o2::framework::InitContext& /*ctx*/)
 
 void LaserAgingFT0Task::startOfActivity(const Activity& activity)
 {
-  // THUS FUNCTION BODY IS AN EXAMPLE. PLEASE REMOVE EVERYTHING YOU DO NOT NEED.
   ILOG(Debug, Devel) << "startOfActivity " << activity.mId << ENDM;
   mHistAmp2ADC0->Reset();
   mHistAmp2ADC1->Reset();
-  for (auto& entry : mMapHistAmpVsBCADC0)
+  for (auto& entry : mMapHistAmpVsBCADC0) {
     entry.second->Reset();
-  for (auto& entry : mMapHistAmpVsBCADC1)
+  }
+  for (auto& entry : mMapHistAmpVsBCADC1) {
     entry.second->Reset();
+  }
 }
 
 void LaserAgingFT0Task::startOfCycle()
 {
-  // THUS FUNCTION BODY IS AN EXAMPLE. PLEASE REMOVE EVERYTHING YOU DO NOT NEED.
   ILOG(Debug, Devel) << "startOfCycle" << ENDM;
 }
 
@@ -127,10 +124,12 @@ void LaserAgingFT0Task::monitorData(o2::framework::ProcessingContext& ctx)
   for (auto& digit : digits) {
     const auto& vecChData = digit.getBunchChannelData(channels);
     for (const auto& chData : vecChData) {
-      if (chData.getFlag(o2::ft0::ChannelData::kNumberADC))
+      if (chData.getFlag(o2::ft0::ChannelData::kNumberADC)) {
         mHistAmp2ADC1->Fill(static_cast<Double_t>(chData.ChId), static_cast<Double_t>(chData.QTCAmpl));
-      else
+      }
+      else {
         mHistAmp2ADC0->Fill(static_cast<Double_t>(chData.ChId), static_cast<Double_t>(chData.QTCAmpl));
+      }
       if (mSetRefPMTChIDs.find(static_cast<unsigned int>(chData.ChId)) != mSetRefPMTChIDs.end()) {
         if (chData.QTCAmpl > costumAmplCut) {
           if (chData.getFlag(o2::ft0::ChannelData::kNumberADC)) {
@@ -146,22 +145,16 @@ void LaserAgingFT0Task::monitorData(o2::framework::ProcessingContext& ctx)
 
 void LaserAgingFT0Task::endOfCycle()
 {
-  // THUS FUNCTION BODY IS AN EXAMPLE. PLEASE REMOVE EVERYTHING YOU DO NOT NEED.
   ILOG(Debug, Devel) << "endOfCycle" << ENDM;
 }
 
 void LaserAgingFT0Task::endOfActivity(const Activity& /*activity*/)
 {
-  // THUS FUNCTION BODY IS AN EXAMPLE. PLEASE REMOVE EVERYTHING YOU DO NOT NEED.
   ILOG(Debug, Devel) << "endOfActivity" << ENDM;
 }
 
 void LaserAgingFT0Task::reset()
 {
-  // THUS FUNCTION BODY IS AN EXAMPLE. PLEASE REMOVE EVERYTHING YOU DO NOT NEED.
-
-  // clean all the monitor objects here
-
   ILOG(Debug, Devel) << "Resetting the histograms" << ENDM;
   mHistAmp2ADC0->Reset();
   mHistAmp2ADC1->Reset();

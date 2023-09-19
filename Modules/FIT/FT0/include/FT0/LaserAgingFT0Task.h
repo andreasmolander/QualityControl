@@ -25,24 +25,19 @@
 #include <array>
 #include <boost/algorithm/string.hpp>
 
-#include "TH1.h"
-#include "TH2.h"
-#include "TList.h"
-#include "Rtypes.h"
-
 #include <Framework/InputRecord.h>
-#include "CommonConstants/LHCConstants.h"
+#include <CommonConstants/LHCConstants.h>
 #include "QualityControl/TaskInterface.h"
 #include "QualityControl/QcInfoLogger.h"
-#include "FT0Base/Constants.h"
-#include "FT0Base/Geometry.h"
-#include "DataFormatsFT0/Digit.h"
-#include "DataFormatsFT0/ChannelData.h"
+#include <FT0Base/Constants.h>
+#include <FT0Base/Geometry.h>
+#include <DataFormatsFT0/Digit.h>
+#include <DataFormatsFT0/ChannelData.h>
 
-#include "TH1.h"
-#include "TH2.h"
-#include "TList.h"
-#include "Rtypes.h"
+#include <TH1.h>
+#include <TH2.h>
+#include <TList.h>
+#include <Rtypes.h>
 
 using namespace o2::quality_control::core;
 
