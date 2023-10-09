@@ -2,8 +2,8 @@
 
 add_library(O2QcFT0)
 
-target_sources(O2QcFT0 PRIVATE src/TH1ReductorLaser.cxx
-                               src/DigitQcTaskLaser.cxx
+target_sources(O2QcFT0 PRIVATE src/AgingLaserReductor.cxx
+                               src/AgingLaserTask.cxx
                                src/DigitQcTask.cxx
                                src/GenericCheck.cxx
                                src/CFDEffCheck.cxx
@@ -11,7 +11,6 @@ target_sources(O2QcFT0 PRIVATE src/TH1ReductorLaser.cxx
                                src/PostProcTask.cxx
                                src/OutOfBunchCollCheck.cxx
                                src/MergedTreeCheck.cxx
-			       src/LaserAgingFT0Task.cxx
                                src/RecPointsQcTask.cxx)
 
 target_include_directories(
@@ -33,8 +32,8 @@ install(TARGETS O2QcFT0
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 add_root_dictionary(O2QcFT0
-  HEADERS include/FT0/TH1ReductorLaser.h
-          include/FT0/DigitQcTaskLaser.h
+  HEADERS include/FT0/AgingLaserReductor.h
+          include/FT0/AgingLaserTask.h
           include/FT0/DigitQcTask.h
           include/FT0/PostProcTask.h
           include/FT0/CFDEffCheck.h
@@ -44,7 +43,6 @@ add_root_dictionary(O2QcFT0
           include/FT0/Utilities.h
           include/FT0/MergedTreeCheck.h
           include/FT0/RecPointsQcTask.h
-	  include/FT0/LaserAgingFT0Task.h
   LINKDEF include/FT0/LinkDef.h)
 
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/FT0
@@ -92,6 +90,7 @@ endforeach()
 # ----- Configs -------
 install(FILES
         ft0-reconstruction-config.json
+        etc/ft0-aging-laser.json
         DESTINATION etc)
 
 get_property(dirs

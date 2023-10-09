@@ -10,12 +10,11 @@
 /// or submit itself to any jurisdiction.
 
 ///
-/// \file   TH1ReductorLaser.cxx
-/// \author Piotr Konopka, developed to laser QC by Sandor Lokos
-/// (sandor.lokos@cern.ch)
+/// \file   AgingLaserReductor.cxx
+/// \author Sandor Lokos <sandor.lokos@cern.ch>, Edmundo Garcia-Solis <edmundo.garcia@cern.ch>, Andreas Molander <andreas.molander@cern.ch>
 ///
 
-#include "FT0/TH1ReductorLaser.h"
+#include "FT0/AgingLaserReductor.h"
 #include "QualityControl/QcInfoLogger.h"
 #include <TF2.h>
 #include <TH2.h>
@@ -23,25 +22,28 @@
 
 namespace o2::quality_control_modules::ft0
 {
-void* TH1ReductorLaser::getBranchAddress() { return &mStats; }
-const char* TH1ReductorLaser::getBranchLeafList()
+void* AgingLaserReductor::getBranchAddress() { return &mStats; }
+const char* AgingLaserReductor::getBranchLeafList()
 {
   return Form("validity1/D:validity2/D:mean1/D:mean2/D:mean[%i]/D:stddev1:stddev2:stddev[%i]", NChannel, NChannel);
 }
 
-void TH1ReductorLaser::update(TObject* obj)
+void AgingLaserReductor::update(TObject* obj)
 {
   if (auto histo = dynamic_cast<TH2F*>(obj)) {
+    // Get ch ID
     int channel = -1;
     sscanf(histo->GetName(), "%*[^0-9]%d", &channel);
+    
     if (channel < NChannel) {
-      for (int ichannel = 0; ichannel < NChannel; ichannel++) {
-        const int bin = ichannel + 1;
-        TH1* bc_projection = histo->ProjectionY(Form("first peak in BC #%d", ichannel), bin, bin);
-        mStats.mean[ichannel] = bc_projection->GetMean();
-        mStats.stddev[ichannel] = bc_projection->GetStdDev();
+      // Detector channels
+      for (int iCh = 0; iCh < mNDetectorChannels; iCh++) {
+        TH1* bc_projection = histo->ProjectionY(Form("AmpCh%i", iCh), iCh + 1, iCh + 1);
+        mStats.mean[iCh] = bc_projection->GetMean();
+        mStats.stddev[iCh] = bc_projection->GetStdDev();
       }
     } else {
+      // Reference channels
       TH1* bc_projection = histo->ProjectionY("bc_projection", 0, -1);
       int ibc = 0;
       int ibc_max = 0;
@@ -94,7 +96,7 @@ void TH1ReductorLaser::update(TObject* obj)
         ILOG(Warning) << "TH1ReductorLaser: one of the peaks of the reference PMT is missing!" << ENDM;
       if (!gotFirstPeak && !gotSecondPeak)
         ILOG(Warning) << "TH1ReductorLaser: cannot find peaks of the reference PMT distribution at all !" << ENDM;
+    }
   }
-}
 }
 } // namespace o2::quality_control_modules::ft0

@@ -10,33 +10,31 @@
 // or submit itself to any jurisdiction.
 
 ///
-/// \file   TH1ReductorLaser.h
-/// \author Piotr Konopka, developed to laser QC by Sandor Lokos
-/// (sandor.lokos@cern.ch)
+/// \file   AgingLaserReductor.h
+/// \author Sandor Lokos <sandor.lokos@cern.ch>, Edmundo Garcia-Solis <edmundo.garcia@cern.ch>, Andreas Molander <andreas.molander@cern.ch>
 ///
-#ifndef QUALITYCONTROL_TH1REDUCTORLASER_H
-#define QUALITYCONTROL_TH1REDUCTORLASER_H
+#ifndef QUALITYCONTROL_AGINGLASERREDUCTOR_H
+#define QUALITYCONTROL_AGINGLASERREDUCTOR_H
 
 #include "QualityControl/ReductorTObject.h"
 
 namespace o2::quality_control_modules::ft0
 {
 
-/// \brief A Reductor which obtains the most popular characteristics of TH1.
-///
-/// A Reductor which obtains the most popular characteristics of TH1.
-/// It produces a branch in the format: "mean/D:stddev:entries"
-class TH1ReductorLaser : public quality_control::postprocessing::ReductorTObject
+class AgingLaserReductor : public quality_control::postprocessing::ReductorTObject
 {
  public:
-  TH1ReductorLaser() = default;
-  ~TH1ReductorLaser() = default;
+  AgingLaserReductor() = default;
+  ~AgingLaserReductor() = default;
 
   void* getBranchAddress() override;
   const char* getBranchLeafList() override;
   void update(TObject* obj) override;
 
  private:
+  // TODO: fetch these from somewhere?
+  static constexpr int mNDetectorChannels = 208;
+  static constexpr int mNChannels = 212;
   static constexpr int NChannel = 208;
   struct {
     Double_t validity1;
@@ -53,4 +51,4 @@ class TH1ReductorLaser : public quality_control::postprocessing::ReductorTObject
 
 } // namespace o2::quality_control_modules::ft0
 
-#endif // QUALITYCONTROL_TH1REDUCTORLASER_H
+#endif // QUALITYCONTROL_AGINGLASERREDUCTOR_H
