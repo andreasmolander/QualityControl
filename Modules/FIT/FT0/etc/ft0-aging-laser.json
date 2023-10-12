@@ -35,8 +35,15 @@
           "query": "digits:FT0/DIGITSBC/0;channels:FT0/DIGITSCH/0"
         },
         "taskParameters": {
-          "RefChannelIDs": "208,209,210,211",
-          "ampCut": "100"
+          "#detectorChannelIDs": "omit to use all",
+          "referenceChannelIDs": "208,209,210,211",
+          "detectorAmpCut": "0",
+          "referenceAmpCut": "100",
+          "laserTriggerBCs": "0, 1783",
+          "detectorBCdelay": "131",
+          "referencePeak1BCdelays": "115, 115, 115, 115",
+          "referencePeak2BCdelays": "136, 142, 135, 141",
+          "debug": "true"
         }
       }
     }
