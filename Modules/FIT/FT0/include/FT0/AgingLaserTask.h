@@ -29,9 +29,7 @@
 #include <cstdint>
 #include <map>
 #include <memory>
-#include <regex>
 #include <set>
-#include <type_traits>
 #include <vector>
 
 using namespace o2::quality_control::core;
@@ -42,12 +40,9 @@ namespace o2::quality_control_modules::ft0
 class AgingLaserTask final : public TaskInterface
 {
  public:
-  /// \brief Constructor
   AgingLaserTask() = default;
-  /// \brief Destructor
   ~AgingLaserTask() override;
 
-  // Definition of the methods for the template method pattern
   void initialize(o2::framework::InitContext& ctx) override;
   void startOfActivity(const Activity& activity) override;
   void startOfCycle() override;
@@ -57,6 +52,9 @@ class AgingLaserTask final : public TaskInterface
   void reset() override;
 
  private:
+  /// Check if BC is a laser trigger BC
+  bool bcIsTrigger(int bc, int bcDelay) const;
+  bool bcIsDetector(int bc) const;
   bool bcIsPeak1(int bc, int chId) const;
   bool bcIsPeak2(int bc, int chId) const;
 
@@ -70,9 +68,9 @@ class AgingLaserTask final : public TaskInterface
   int mDetectorAmpCut;                            ///< Amplitude cut for detector channels
   int mReferenceAmpCut;                           ///< Amplitude cut for reference channels
   std::vector<int> mLaserTriggerBCs;              ///< BCs in which the laser is triggered
-  int mDetectorBCdelay;                           ///< BC delay for detector channels, TODO: set for each channel?
-  std::map<uint8_t, int> mReferencePeak1BCdelays; ///< BC delays for reference channel peak 1
-  std::map<uint8_t, int> mReferencePeak2BCdelays; ///< BC delays for reference channel peak 2
+  int mDetectorBCdelay;                           ///< BC delay for detector channels (same for all)
+  std::map<uint8_t, int> mReferencePeak1BCdelays; ///< BC delays for reference channel peak 1 (per channel)
+  std::map<uint8_t, int> mReferencePeak2BCdelays; ///< BC delays for reference channel peak 2 (per channel)
 
   bool mDebug = false; ///< Enable more histograms in debug mode
 
@@ -86,25 +84,10 @@ class AgingLaserTask final : public TaskInterface
   std::unique_ptr<TH2I> mHistAmpVsChPeak2ADC0; ///< Amplitude per channel for peak 2 for ADC0 (reference channels)
   std::unique_ptr<TH2I> mHistAmpVsChPeak2ADC1; ///< Amplitude per channel for peak 2 for ADC1 (reference channels)
 
-  // Amplitude histograms for reference channel peaks
-  std::map<uint8_t, std::unique_ptr<TH1I>> mMapHistAmpPeak1ADC0;
-  std::map<uint8_t, std::unique_ptr<TH1I>> mMapHistAmpPeak1ADC1;
-  std::map<uint8_t, std::unique_ptr<TH1I>> mMapHistAmpPeak2ADC0;
-  std::map<uint8_t, std::unique_ptr<TH1I>> mMapHistAmpPeak2ADC1;
-
-  // Time per channel
-  std::unique_ptr<TH2I> mHistTimeVsChADC0;      ///< Time per channel for ADC0 (detector + reference channels)
-  std::unique_ptr<TH2I> mHistTimeVsChADC1;      ///< Time per channel for ADC1 (detector + reference channels)
-  std::unique_ptr<TH2I> mHistTimeVsChPeak1ADC0; ///< Time per channel for peak 1 for ADC0 (reference channels)
-  std::unique_ptr<TH2I> mHistTimeVsChPeak1ADC1; ///< Time per channel for peak 1 for ADC1 (reference channels)
-  std::unique_ptr<TH2I> mHistTimeVsChPeak2ADC0; ///< Time per channel for peak 2 for ADC0 (reference channels)
-  std::unique_ptr<TH2I> mHistTimeVsChPeak2ADC1; ///< Time per channel for peak 2 for ADC1 (reference channels)
-
-  // Time histograms for reference channel peaks (TODO: move to debug?)
-  std::map<uint8_t, std::unique_ptr<TH1I>> mMapHistTimePeak1ADC0;
-  std::map<uint8_t, std::unique_ptr<TH1I>> mMapHistTimePeak1ADC1;
-  std::map<uint8_t, std::unique_ptr<TH1I>> mMapHistTimePeak2ADC0;
-  std::map<uint8_t, std::unique_ptr<TH1I>> mMapHistTimePeak2ADC1;
+  // // Time per channel
+  std::unique_ptr<TH2I> mHistTimeVsCh;          ///< Time per channel (detector + reference channels)
+  std::unique_ptr<TH2I> mHistTimeVsChPeak1;     ///< Time per channel for peak 1 (reference channels, both ADCs)
+  std::unique_ptr<TH2I> mHistTimeVsChPeak2;     ///< Time per channel for peak 2 (reference channels, both ADCs)
 
   // Debug histograms
 
@@ -117,8 +100,28 @@ class AgingLaserTask final : public TaskInterface
   std::map<uint8_t, std::unique_ptr<TH1I>> mMapDebugHistAmpADC1;  ///< Ampltidue for ADC1
   std::map<uint8_t, std::unique_ptr<TH1I>> mMapDebugHistAmpPeak1; ///< Amplitude for peak 1 
   std::map<uint8_t, std::unique_ptr<TH1I>> mMapDebugHistAmpPeak2; ///< Amplitude for peak 2
+  std::map<uint8_t, std::unique_ptr<TH1I>> mMapDebugHistAmpPeak1ADC0;
+  std::map<uint8_t, std::unique_ptr<TH1I>> mMapDebugHistAmpPeak1ADC1;
+  std::map<uint8_t, std::unique_ptr<TH1I>> mMapDebugHistAmpPeak2ADC0;
+  std::map<uint8_t, std::unique_ptr<TH1I>> mMapDebugHistAmpPeak2ADC1;
 
-  // TODO: add time histograms for reference channel peaks
+  // Time per channel
+  // TODO: add mDebugHistTimeVsCh
+  std::unique_ptr<TH2I> mDebugHistTimeVsChADC0;      ///< Time per channel for ADC0 (detector + reference channels)
+  std::unique_ptr<TH2I> mDebugHistTimeVsChADC1;      ///< Time per channel for ADC1 (detector + reference channels)
+  std::unique_ptr<TH2I> mDebugHistTimeVsChPeak1ADC0; ///< Time per channel for peak 1 for ADC0 (reference channels)
+  std::unique_ptr<TH2I> mDebugHistTimeVsChPeak1ADC1; ///< Time per channel for peak 1 for ADC1 (reference channels)
+  std::unique_ptr<TH2I> mDebugHistTimeVsChPeak2ADC0; ///< Time per channel for peak 2 for ADC0 (reference channels)
+  std::unique_ptr<TH2I> mDebugHistTimeVsChPeak2ADC1; ///< Time per channel for peak 2 for ADC1 (reference channels)
+  
+  // Time histograms for reference channel peaks
+  // TODO: add mMapDebugHistTime, mMapDebugHistTimeADC0, mMapDebugHistTimeADC1
+  std::map<uint8_t, std::unique_ptr<TH1I>> mMapDebugHistTimePeak1;
+  std::map<uint8_t, std::unique_ptr<TH1I>> mMapDebugHistTimePeak2;
+  std::map<uint8_t, std::unique_ptr<TH1I>> mMapDebugHistTimePeak1ADC0;
+  std::map<uint8_t, std::unique_ptr<TH1I>> mMapDebugHistTimePeak1ADC1;
+  std::map<uint8_t, std::unique_ptr<TH1I>> mMapDebugHistTimePeak2ADC0;
+  std::map<uint8_t, std::unique_ptr<TH1I>> mMapDebugHistTimePeak2ADC1;
 
   // BC
   std::unique_ptr<TH1I> mDebugHistBC;                    ///< All BCs
@@ -134,12 +137,17 @@ class AgingLaserTask final : public TaskInterface
   std::unique_ptr<TH1I> mDebugHistBCReferenceAmpCutADC0; ///< Reference channel BCs with amplitude cut for ADC0
   std::unique_ptr<TH1I> mDebugHistBCReferenceAmpCutADC1; ///< Reference channel BCs with amplitude cut for ADC1
 
-  // Amplitude per BC for reference channels (TODO: should we add for all channels?)
+  // Amplitude per BC for reference channels
   std::map<uint8_t, std::unique_ptr<TH2I>> mMapDebugHistAmpVsBC;     ///< Amplitude vs BC (both ADCs and peaks = 4 peaks)
   std::map<uint8_t, std::unique_ptr<TH2I>> mMapDebugHistAmpVsBCADC0; ///< Amplitude vs BC for ADC0 (both peaks)
   std::map<uint8_t, std::unique_ptr<TH2I>> mMapDebugHistAmpVsBCADC1; ///< Amplitude vs BC for ADC1 (both peaks)
 
-  // TODO: time per BC for reference channels (TODO: should we add for all channels?)
+  // Including the histograms below will produce 'object of class TObjArray read too many bytes' in --local-batch mode
+
+  // // Time per BC for reference channels
+  // std::map<uint8_t, std::unique_ptr<TH2I>> mMapDebugHistTimeVsBC;     ///< Time vs BC (both ADCs and peaks = 4 peaks)
+  // std::map<uint8_t, std::unique_ptr<TH2I>> mMapDebugHistTimeVsBCADC0; ///< Time vs BC for ADC0 (both peaks)
+  // std::map<uint8_t, std::unique_ptr<TH2I>> mMapDebugHistTimeVsBCADC1; ///< Time vs BC for ADC1 (both peaks)
 };
 
 } // namespace o2::quality_control_modules::ft0

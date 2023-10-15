@@ -78,7 +78,6 @@ void AgingLaserTask::initialize(o2::framework::InitContext&)
     const auto vecParams = fit::helper::parseParameters<int>(laserTriggerBCs, ",");
     for (const int bc : vecParams) {
       mLaserTriggerBCs.push_back(bc);
-      // mLaserTriggerBCs.insert(bc);
     }
   }
   if (mLaserTriggerBCs.size() == 0) {
@@ -147,47 +146,15 @@ void AgingLaserTask::initialize(o2::framework::InitContext&)
   getObjectsManager()->setDefaultDrawOptions(mHistAmpVsChPeak2ADC1.get(), "COLZ");
 
   // Time per channel
-  mHistTimeVsChADC0 = std::make_unique<TH2I>("TimePerChannelADC0", "Time vs channel (ADC0);Channel;Time", sNCHANNELS_PM, 0, sNCHANNELS_PM, 4100, -2050, 2050);
-  mHistTimeVsChADC1 = std::make_unique<TH2I>("TimePerChannelADC1", "Time vs channel (ADC1);Channel;Time", sNCHANNELS_PM, 0, sNCHANNELS_PM, 4100, -2050, 2050);
-  mHistTimeVsChPeak1ADC0 = std::make_unique<TH2I>("TimePerChannelPeak1ADC0", "Time vs channel (peak 1, ADC0);Channel;Time", sNCHANNELS_PM, 0, sNCHANNELS_PM, 4100, -2050, 2050);
-  mHistTimeVsChPeak1ADC1 = std::make_unique<TH2I>("TimePerChannelPeak1ADC1", "Time vs channel (peak 1, ADC1);Channel;Time", sNCHANNELS_PM, 0, sNCHANNELS_PM, 4100, -2050, 2050);
-  mHistTimeVsChPeak2ADC0 = std::make_unique<TH2I>("TimePerChannelPeak2ADC0", "Time vs channel (peak 2, ADC0);Channel;Time", sNCHANNELS_PM, 0, sNCHANNELS_PM, 4100, -2050, 2050);
-  mHistTimeVsChPeak2ADC1 = std::make_unique<TH2I>("TimePerChannelPeak2ADC1", "Time vs channel (peak 2, ADC1);Channel;Time", sNCHANNELS_PM, 0, sNCHANNELS_PM, 4100, -2050, 2050);
-  getObjectsManager()->startPublishing(mHistTimeVsChADC0.get());
-  getObjectsManager()->startPublishing(mHistTimeVsChADC1.get());
-  getObjectsManager()->startPublishing(mHistTimeVsChPeak1ADC0.get());
-  getObjectsManager()->startPublishing(mHistTimeVsChPeak1ADC1.get());
-  getObjectsManager()->startPublishing(mHistTimeVsChPeak2ADC0.get());
-  getObjectsManager()->startPublishing(mHistTimeVsChPeak2ADC1.get());
-  getObjectsManager()->setDefaultDrawOptions(mHistTimeVsChADC0.get(), "COLZ");
-  getObjectsManager()->setDefaultDrawOptions(mHistTimeVsChADC1.get(), "COLZ");
-  getObjectsManager()->setDefaultDrawOptions(mHistTimeVsChPeak1ADC0.get(), "COLZ");
-  getObjectsManager()->setDefaultDrawOptions(mHistTimeVsChPeak1ADC1.get(), "COLZ");
-  getObjectsManager()->setDefaultDrawOptions(mHistTimeVsChPeak2ADC0.get(), "COLZ");
-  getObjectsManager()->setDefaultDrawOptions(mHistTimeVsChPeak2ADC1.get(), "COLZ");
-
-  // Reference channel histograms
-  for (const uint8_t refChId : mReferenceChIDs) {
-    // Ampltiude histograms for referece channel peaks
-    mMapHistAmpPeak1ADC0.insert({ refChId, std::make_unique<TH1I>(Form("AmpCh%iPeak1ADC0", refChId), Form("Amplitude, channel %i, peak 1, ADC0;Amp;", refChId), 4200, -100, 4100)});
-    mMapHistAmpPeak1ADC1.insert({ refChId, std::make_unique<TH1I>(Form("AmpCh%iPeak1ADC1", refChId), Form("Amplitude, channel %i, peak 1, ADC1;Amp;", refChId), 4200, -100, 4100)});
-    mMapHistAmpPeak2ADC0.insert({ refChId, std::make_unique<TH1I>(Form("AmpCh%iPeak2ADC0", refChId), Form("Amplitude, channel %i, peak 2, ADC0;Amp;", refChId), 4200, -100, 4100)});
-    mMapHistAmpPeak2ADC1.insert({ refChId, std::make_unique<TH1I>(Form("AmpCh%iPeak2ADC1", refChId), Form("Amplitude, channel %i, peak 2, ADC1;Amp;", refChId), 4200, -100, 4100)});
-    getObjectsManager()->startPublishing(mMapHistAmpPeak1ADC0.at(refChId).get());
-    getObjectsManager()->startPublishing(mMapHistAmpPeak1ADC1.at(refChId).get());
-    getObjectsManager()->startPublishing(mMapHistAmpPeak2ADC0.at(refChId).get());
-    getObjectsManager()->startPublishing(mMapHistAmpPeak2ADC1.at(refChId).get());
-
-    // Time histograms for reference channel peaks
-    mMapHistTimePeak1ADC0.insert({ refChId, std::make_unique<TH1I>(Form("TimeCh%iPeak1ADC0", refChId), Form("Time, channel %i, peak 1, ADC0;Time;", refChId), 4100, -2050, 2050)});
-    mMapHistTimePeak1ADC1.insert({ refChId, std::make_unique<TH1I>(Form("TimeCh%iPeak1ADC1", refChId), Form("Time, channel %i, peak 1, ADC1;Time;", refChId), 4100, -2050, 2050)});
-    mMapHistTimePeak2ADC0.insert({ refChId, std::make_unique<TH1I>(Form("TimeCh%iPeak2ADC0", refChId), Form("Time, channel %i, peak 2, ADC0;Time;", refChId), 4100, -2050, 2050)});
-    mMapHistTimePeak2ADC1.insert({ refChId, std::make_unique<TH1I>(Form("TimeCh%iPeak2ADC1", refChId), Form("Time, channel %i, peak 2, ADC1;Time;", refChId), 4100, -2050, 2050)});
-    getObjectsManager()->startPublishing(mMapHistTimePeak1ADC0.at(refChId).get());
-    getObjectsManager()->startPublishing(mMapHistTimePeak1ADC1.at(refChId).get());
-    getObjectsManager()->startPublishing(mMapHistTimePeak2ADC0.at(refChId).get());
-    getObjectsManager()->startPublishing(mMapHistTimePeak2ADC1.at(refChId).get());
-  }
+  mHistTimeVsCh = std::make_unique<TH2I>("TimePerChannel", "Time vs channel;Channel;Time", sNCHANNELS_PM, 0, sNCHANNELS_PM, 4100, -2050, 2050);
+  mHistTimeVsChPeak1 = std::make_unique<TH2I>("TimePerChannelPeak1", "Time vs channel (peak 1);Channel;Time", sNCHANNELS_PM, 0, sNCHANNELS_PM, 4100, -2050, 2050);
+  mHistTimeVsChPeak2 = std::make_unique<TH2I>("TimePerChannelPeak2", "Time vs channel (peak 2);Channel;Time", sNCHANNELS_PM, 0, sNCHANNELS_PM, 4100, -2050, 2050);
+  getObjectsManager()->startPublishing(mHistTimeVsCh.get());
+  getObjectsManager()->startPublishing(mHistTimeVsChPeak1.get());
+  getObjectsManager()->startPublishing(mHistTimeVsChPeak2.get());
+  getObjectsManager()->setDefaultDrawOptions(mHistTimeVsCh.get(), "COLZ");
+  getObjectsManager()->setDefaultDrawOptions(mHistTimeVsChPeak1.get(), "COLZ");
+  getObjectsManager()->setDefaultDrawOptions(mHistTimeVsChPeak2.get(), "COLZ");
 
   // Debug histograms
   if (mDebug) {
@@ -195,6 +162,26 @@ void AgingLaserTask::initialize(o2::framework::InitContext&)
     mDebugHistAmpVsCh = std::make_unique<TH2I>("AmpPerChannel", "Amplitude vs channel;Channel;Amp", sNCHANNELS_PM, 0, sNCHANNELS_PM, 4200, -100, 4100);
     getObjectsManager()->startPublishing(mDebugHistAmpVsCh.get());
     getObjectsManager()->setDefaultDrawOptions(mDebugHistAmpVsCh.get(), "COLZ");
+
+    // Time per channel
+    mDebugHistTimeVsChADC0 = std::make_unique<TH2I>("TimePerChannelADC0", "Time vs channel (ADC0);Channel;Time", sNCHANNELS_PM, 0, sNCHANNELS_PM, 4100, -2050, 2050);
+    mDebugHistTimeVsChADC1 = std::make_unique<TH2I>("TimePerChannelADC1", "Time vs channel (ADC1);Channel;Time", sNCHANNELS_PM, 0, sNCHANNELS_PM, 4100, -2050, 2050);
+    mDebugHistTimeVsChPeak1ADC0 = std::make_unique<TH2I>("TimePerChannelPeak1ADC0", "Time vs channel (peak 1, ADC0);Channel;Time", sNCHANNELS_PM, 0, sNCHANNELS_PM, 4100, -2050, 2050);
+    mDebugHistTimeVsChPeak1ADC1 = std::make_unique<TH2I>("TimePerChannelPeak1ADC1", "Time vs channel (peak 1, ADC1);Channel;Time", sNCHANNELS_PM, 0, sNCHANNELS_PM, 4100, -2050, 2050);
+    mDebugHistTimeVsChPeak2ADC0 = std::make_unique<TH2I>("TimePerChannelPeak2ADC0", "Time vs channel (peak 2, ADC0);Channel;Time", sNCHANNELS_PM, 0, sNCHANNELS_PM, 4100, -2050, 2050);
+    mDebugHistTimeVsChPeak2ADC1 = std::make_unique<TH2I>("TimePerChannelPeak2ADC1", "Time vs channel (peak 2, ADC1);Channel;Time", sNCHANNELS_PM, 0, sNCHANNELS_PM, 4100, -2050, 2050);
+    getObjectsManager()->startPublishing(mDebugHistTimeVsChADC0.get());
+    getObjectsManager()->startPublishing(mDebugHistTimeVsChADC1.get());
+    getObjectsManager()->startPublishing(mDebugHistTimeVsChPeak1ADC0.get());
+    getObjectsManager()->startPublishing(mDebugHistTimeVsChPeak1ADC1.get());
+    getObjectsManager()->startPublishing(mDebugHistTimeVsChPeak2ADC0.get());
+    getObjectsManager()->startPublishing(mDebugHistTimeVsChPeak2ADC1.get());
+    getObjectsManager()->setDefaultDrawOptions(mDebugHistTimeVsChADC0.get(), "COLZ");
+    getObjectsManager()->setDefaultDrawOptions(mDebugHistTimeVsChADC1.get(), "COLZ");
+    getObjectsManager()->setDefaultDrawOptions(mDebugHistTimeVsChPeak1ADC0.get(), "COLZ");
+    getObjectsManager()->setDefaultDrawOptions(mDebugHistTimeVsChPeak1ADC1.get(), "COLZ");
+    getObjectsManager()->setDefaultDrawOptions(mDebugHistTimeVsChPeak2ADC0.get(), "COLZ");
+    getObjectsManager()->setDefaultDrawOptions(mDebugHistTimeVsChPeak2ADC1.get(), "COLZ");
 
     // BC
     mDebugHistBC = std::make_unique<TH1I>("BC", "BC;BC;", sMaxBC, 0, sMaxBC);
@@ -230,11 +217,33 @@ void AgingLaserTask::initialize(o2::framework::InitContext&)
       mMapDebugHistAmpADC1.insert({ refChId, std::make_unique<TH1I>(Form("AmpCh%iADC1", refChId), Form("Amplitude, channel %i, ADC1;Amp;", refChId), 4200, -100, 4100)});
       mMapDebugHistAmpPeak1.insert({ refChId, std::make_unique<TH1I>(Form("AmpCh%iPeak1", refChId), Form("Amplitude, channel %i, peak 1;Amp;", refChId), 4200, -100, 4100)});
       mMapDebugHistAmpPeak2.insert({ refChId, std::make_unique<TH1I>(Form("AmpCh%iPeak2", refChId), Form("Amplitude, channel %i, peak 2;Amp;", refChId), 4200, -100, 4100)});
+      mMapDebugHistAmpPeak1ADC0.insert({ refChId, std::make_unique<TH1I>(Form("AmpCh%iPeak1ADC0", refChId), Form("Amplitude, channel %i, peak 1, ADC0;Amp;", refChId), 4200, -100, 4100)});
+      mMapDebugHistAmpPeak1ADC1.insert({ refChId, std::make_unique<TH1I>(Form("AmpCh%iPeak1ADC1", refChId), Form("Amplitude, channel %i, peak 1, ADC1;Amp;", refChId), 4200, -100, 4100)});
+      mMapDebugHistAmpPeak2ADC0.insert({ refChId, std::make_unique<TH1I>(Form("AmpCh%iPeak2ADC0", refChId), Form("Amplitude, channel %i, peak 2, ADC0;Amp;", refChId), 4200, -100, 4100)});
+      mMapDebugHistAmpPeak2ADC1.insert({ refChId, std::make_unique<TH1I>(Form("AmpCh%iPeak2ADC1", refChId), Form("Amplitude, channel %i, peak 2, ADC1;Amp;", refChId), 4200, -100, 4100)});
       getObjectsManager()->startPublishing(mMapDebugHistAmp.at(refChId).get());
       getObjectsManager()->startPublishing(mMapDebugHistAmpADC0.at(refChId).get());
       getObjectsManager()->startPublishing(mMapDebugHistAmpADC1.at(refChId).get());
       getObjectsManager()->startPublishing(mMapDebugHistAmpPeak1.at(refChId).get());
       getObjectsManager()->startPublishing(mMapDebugHistAmpPeak2.at(refChId).get());
+      getObjectsManager()->startPublishing(mMapDebugHistAmpPeak1ADC0.at(refChId).get());
+      getObjectsManager()->startPublishing(mMapDebugHistAmpPeak1ADC1.at(refChId).get());
+      getObjectsManager()->startPublishing(mMapDebugHistAmpPeak2ADC0.at(refChId).get());
+      getObjectsManager()->startPublishing(mMapDebugHistAmpPeak2ADC1.at(refChId).get());
+
+      // Time histograms for reference channel peaks
+      mMapDebugHistTimePeak1.insert({ refChId, std::make_unique<TH1I>(Form("TimeCh%iPeak1", refChId), Form("Time, channel %i, peak 1;Time;", refChId), 4100, -2050, 2050)});
+      mMapDebugHistTimePeak2.insert({ refChId, std::make_unique<TH1I>(Form("TimeCh%iPeak2", refChId), Form("Time, channel %i, peak 2;Time;", refChId), 4100, -2050, 2050)});
+      mMapDebugHistTimePeak1ADC0.insert({ refChId, std::make_unique<TH1I>(Form("TimeCh%iPeak1ADC0", refChId), Form("Time, channel %i, peak 1, ADC0;Time;", refChId), 4100, -2050, 2050)});
+      mMapDebugHistTimePeak1ADC1.insert({ refChId, std::make_unique<TH1I>(Form("TimeCh%iPeak1ADC1", refChId), Form("Time, channel %i, peak 1, ADC1;Time;", refChId), 4100, -2050, 2050)});
+      mMapDebugHistTimePeak2ADC0.insert({ refChId, std::make_unique<TH1I>(Form("TimeCh%iPeak2ADC0", refChId), Form("Time, channel %i, peak 2, ADC0;Time;", refChId), 4100, -2050, 2050)});
+      mMapDebugHistTimePeak2ADC1.insert({ refChId, std::make_unique<TH1I>(Form("TimeCh%iPeak2ADC1", refChId), Form("Time, channel %i, peak 2, ADC1;Time;", refChId), 4100, -2050, 2050)});
+      getObjectsManager()->startPublishing(mMapDebugHistTimePeak1.at(refChId).get());
+      getObjectsManager()->startPublishing(mMapDebugHistTimePeak2.at(refChId).get());
+      getObjectsManager()->startPublishing(mMapDebugHistTimePeak1ADC0.at(refChId).get());
+      getObjectsManager()->startPublishing(mMapDebugHistTimePeak1ADC1.at(refChId).get());
+      getObjectsManager()->startPublishing(mMapDebugHistTimePeak2ADC0.at(refChId).get());
+      getObjectsManager()->startPublishing(mMapDebugHistTimePeak2ADC1.at(refChId).get());
 
       // Amplitude per BC
       mMapDebugHistAmpVsBC.insert({ refChId, std::make_unique<TH2I>(Form("AmpPerBC_ch%i", refChId), Form("Amplitude vs BC, channel %i;BC;Amp", refChId), sMaxBC, 0, sMaxBC, 4200, -100, 4200) });
@@ -243,6 +252,14 @@ void AgingLaserTask::initialize(o2::framework::InitContext&)
       getObjectsManager()->startPublishing(mMapDebugHistAmpVsBC.at(refChId).get());
       getObjectsManager()->startPublishing(mMapDebugHistAmpVsBCADC0.at(refChId).get());
       getObjectsManager()->startPublishing(mMapDebugHistAmpVsBCADC1.at(refChId).get());
+
+      // // Time per BC
+      // mMapDebugHistTimeVsBC.insert({ refChId, std::make_unique<TH2I>(Form("TimePerBC_ch%i", refChId), Form("Time vs BC, channel %i;BC;Time", refChId), sMaxBC, 0, sMaxBC, 4100, -2050, 2050) });
+      // mMapDebugHistTimeVsBCADC0.insert({ refChId, std::make_unique<TH2I>(Form("TimePerBC_ch%i_ADC0", refChId), Form("Time vs BC, channel %i, ADC0;BC;Time", refChId), sMaxBC, 0, sMaxBC, 4100, -2050, 2050)});
+      // mMapDebugHistTimeVsBCADC1.insert({ refChId, std::make_unique<TH2I>(Form("TimePerBC_ch%i_ADC1", refChId), Form("Time vs BC, channel %i, ADC1;BC;Time", refChId), sMaxBC, 0, sMaxBC, 4100, -2050, 2050)});
+      // getObjectsManager()->startPublishing(mMapDebugHistTimeVsBC.at(refChId).get());
+      // getObjectsManager()->startPublishing(mMapDebugHistTimeVsBCADC0.at(refChId).get());
+      // getObjectsManager()->startPublishing(mMapDebugHistTimeVsBCADC1.at(refChId).get());
     }
   }
 }
@@ -284,6 +301,7 @@ void AgingLaserTask::monitorData(o2::framework::ProcessingContext& ctx)
     bool bcHasReferenceChAmpCutADC1 = false;
 
     if (mDebug) {
+      // Fill all BCs
       mDebugHistBC->Fill(bc);
     }
 
@@ -297,7 +315,7 @@ void AgingLaserTask::monitorData(o2::framework::ProcessingContext& ctx)
       const bool isADC0 = !chData.getFlag(o2::ft0::ChannelData::kNumberADC);
       const bool isADC1 = !isADC0;
       const bool isAmpCutOk = chAmp > mReferenceAmpCut;
-      const bool isDetAmpCutOk = chAmp > mDetectorAmpCut;
+      const bool isDetAmpCutOk = chAmp > mDetectorAmpCut; // TODO: use this
       const bool isRefAmpCutOk = chAmp > mReferenceAmpCut;
 
       if (mDebug) {
@@ -318,14 +336,17 @@ void AgingLaserTask::monitorData(o2::framework::ProcessingContext& ctx)
       // Fill amplitude/time per channel histograms
       if (mDebug) {
         mDebugHistAmpVsCh->Fill(chId, chAmp);
+        isADC0 ? mDebugHistTimeVsChADC0->Fill(chId, chTime) : mDebugHistTimeVsChADC1->Fill(chId, chTime);
       }
+      mHistTimeVsCh->Fill(chId, chTime);
       isADC0 ? mHistAmpVsChADC0->Fill(chId, chAmp) : mHistAmpVsChADC1->Fill(chId, chAmp);
-      isADC0 ? mHistTimeVsChADC0->Fill(chId, chTime) : mHistTimeVsChADC1->Fill(chId, chTime);
 
       // Fill amplitude per BC for reference channels
       if (mDebug && isRef && isRefAmpCutOk) {
-        mMapDebugHistAmpVsBC[chId]->Fill(bc, chAmp);
-        isADC0 ? mMapDebugHistAmpVsBCADC0[chId]->Fill(bc, chAmp) : mMapDebugHistAmpVsBCADC1[chId]->Fill(bc, chAmp);
+        mMapDebugHistAmpVsBC.at(chId)->Fill(bc, chAmp);
+        isADC0 ? mMapDebugHistAmpVsBCADC0.at(chId)->Fill(bc, chAmp) : mMapDebugHistAmpVsBCADC1.at(chId)->Fill(bc, chAmp);
+        // mMapDebugHistTimeVsBC.at(chId)->Fill(bc, chTime);
+        // isADC0 ? mMapDebugHistTimeVsBCADC0.at(chId)->Fill(bc, chTime) : mMapDebugHistTimeVsBCADC1.at(chId)->Fill(bc, chTime);
       }
 
       // Fill reference channel ampltidude histograms
@@ -338,39 +359,54 @@ void AgingLaserTask::monitorData(o2::framework::ProcessingContext& ctx)
 
         // Ampltiude for the different peaks. The peaks are selected based on BC
         if (isRefAmpCutOk) {
-          // Ampltiude peak 1
+          // Ampltiude/time peak 1
           if (bcIsPeak1(bc, chId)) {
             if (mDebug) {
               mMapDebugHistAmpPeak1.at(chId)->Fill(chAmp);
+              mMapDebugHistTimePeak1.at(chId)->Fill(chTime);
             }
+            mHistTimeVsChPeak1->Fill(chId, chTime);
+
             if (isADC0) {
-              mMapHistAmpPeak1ADC0.at(chId)->Fill(chAmp);
-              mMapHistTimePeak1ADC0.at(chId)->Fill(chTime);
+              if (mDebug) {
+                mMapDebugHistAmpPeak1ADC0.at(chId)->Fill(chAmp);
+                mDebugHistTimeVsChPeak1ADC0->Fill(chId, chTime);
+                mMapDebugHistTimePeak1ADC0.at(chId)->Fill(chTime);
+              }
               mHistAmpVsChPeak1ADC0->Fill(chId, chAmp);
-              mHistTimeVsChPeak1ADC0->Fill(chId, chTime);
+              
             } else {
-              mMapHistAmpPeak1ADC1.at(chId)->Fill(chAmp);
-              mMapHistTimePeak1ADC1.at(chId)->Fill(chTime);
+              if (mDebug) {
+                mMapDebugHistAmpPeak1ADC1.at(chId)->Fill(chAmp);
+                mDebugHistTimeVsChPeak1ADC1->Fill(chId, chTime);
+                mMapDebugHistTimePeak1ADC1.at(chId)->Fill(chTime);
+              }
               mHistAmpVsChPeak1ADC1->Fill(chId, chAmp);
-              mHistTimeVsChPeak1ADC1->Fill(chId, chTime);
             }
           }
 
-          // Amplitude peak 2
+          // Amplitude/time peak 2
           if (bcIsPeak2(bc, chId)) {
             if (mDebug) {
               mMapDebugHistAmpPeak2.at(chId)->Fill(chAmp);
+              mMapDebugHistTimePeak2.at(chId)->Fill(chTime);
             }
+            mHistTimeVsChPeak2->Fill(chId, chTime);
+
             if (isADC0) {
-              mMapHistAmpPeak2ADC0.at(chId)->Fill(chAmp);
-              mMapHistTimePeak2ADC0.at(chId)->Fill(chTime);
+              if (mDebug) {
+                mMapDebugHistAmpPeak2ADC0.at(chId)->Fill(chAmp);
+                mDebugHistTimeVsChPeak2ADC0->Fill(chId, chTime);
+                mMapDebugHistTimePeak2ADC0.at(chId)->Fill(chTime);
+              }
               mHistAmpVsChPeak2ADC0->Fill(chId, chAmp);
-              mHistTimeVsChPeak2ADC0->Fill(chId, chTime);
             } else {
-              mMapHistAmpPeak2ADC1.at(chId)->Fill(chAmp);
-              mMapHistTimePeak2ADC1.at(chId)->Fill(chTime);
+              if (mDebug) {
+                mMapDebugHistAmpPeak2ADC1.at(chId)->Fill(chAmp);
+                mDebugHistTimeVsChPeak2ADC1->Fill(chId, chTime);
+                mMapDebugHistTimePeak2ADC1.at(chId)->Fill(chTime);
+              }
               mHistAmpVsChPeak2ADC1->Fill(chId, chAmp);
-              mHistTimeVsChPeak2ADC1->Fill(chId, chTime);
             }
           }
         } // if isRefAmpCutOK
@@ -378,7 +414,7 @@ void AgingLaserTask::monitorData(o2::framework::ProcessingContext& ctx)
     } // channel loop
 
     if (mDebug) {
-      // Fill BC distributions
+      // Fill BCs
       if (bcHasAmpCut) {
         mDebugHistBCAmpCut->Fill(bc);
       }
@@ -441,40 +477,9 @@ void AgingLaserTask::reset()
   mHistAmpVsChPeak2ADC1->Reset();
 
   // Time per channel
-  mHistTimeVsChADC0->Reset();
-  mHistTimeVsChADC1->Reset();
-  mHistTimeVsChPeak1ADC0->Reset();
-  mHistTimeVsChPeak1ADC1->Reset();
-  mHistTimeVsChPeak2ADC0->Reset();
-  mHistTimeVsChPeak2ADC1->Reset();
-
-  // Amplitude histograms for reference channel peaks
-  for (auto& entry : mMapHistAmpPeak1ADC0) {
-    entry.second->Reset();
-  }
-  for (auto& entry : mMapHistAmpPeak1ADC1) {
-    entry.second->Reset();
-  }
-  for (auto& entry : mMapHistAmpPeak2ADC0) {
-    entry.second->Reset();
-  }
-  for (auto& entry : mMapHistAmpPeak2ADC1) {
-    entry.second->Reset();
-  }
-
-  // Time histograms for reference channel peaks
-  for (auto& entry : mMapHistTimePeak1ADC0) {
-    entry.second->Reset();
-  }
-  for (auto& entry : mMapHistTimePeak1ADC1) {
-    entry.second->Reset();
-  }
-  for (auto& entry : mMapHistTimePeak2ADC0) {
-    entry.second->Reset();
-  }
-  for (auto& entry : mMapHistTimePeak2ADC1) {
-    entry.second->Reset();
-  }
+  mHistTimeVsCh->Reset();
+  mHistTimeVsChPeak1->Reset();
+  mHistTimeVsChPeak2->Reset();
 
   if (mDebug) {
     // Amplitude per channel
@@ -494,6 +499,46 @@ void AgingLaserTask::reset()
       entry.second->Reset();
     }
     for (auto& entry : mMapDebugHistAmpPeak2) {
+      entry.second->Reset();
+    }
+    for (auto& entry : mMapDebugHistAmpPeak1ADC0) {
+      entry.second->Reset();
+    }
+    for (auto& entry : mMapDebugHistAmpPeak1ADC1) {
+      entry.second->Reset();
+    }
+    for (auto& entry : mMapDebugHistAmpPeak2ADC0) {
+      entry.second->Reset();
+    }
+    for (auto& entry : mMapDebugHistAmpPeak2ADC1) {
+      entry.second->Reset();
+    }
+
+    // Time per channel
+    mDebugHistTimeVsChADC0->Reset();
+    mDebugHistTimeVsChADC1->Reset();
+    mDebugHistTimeVsChPeak1ADC0->Reset();
+    mDebugHistTimeVsChPeak1ADC1->Reset();
+    mDebugHistTimeVsChPeak2ADC0->Reset();
+    mDebugHistTimeVsChPeak2ADC1->Reset();
+
+    // Time histograms for reference channel peaks
+    for (auto& entry : mMapDebugHistTimePeak1) {
+      entry.second->Reset();
+    }
+    for (auto& entry : mMapDebugHistTimePeak2) {
+      entry.second->Reset();
+    }
+    for (auto& entry : mMapDebugHistTimePeak1ADC0) {
+      entry.second->Reset();
+    }
+    for (auto& entry : mMapDebugHistTimePeak1ADC1) {
+      entry.second->Reset();
+    }
+    for (auto& entry : mMapDebugHistTimePeak2ADC0) {
+      entry.second->Reset();
+    }
+    for (auto& entry : mMapDebugHistTimePeak2ADC1) {
       entry.second->Reset();
     }
 
@@ -521,27 +566,43 @@ void AgingLaserTask::reset()
     for (auto& entry : mMapDebugHistAmpVsBCADC1) {
       entry.second->Reset();
     }
+
+    // // Time per BC for reference channels
+    // for (auto& entry : mMapDebugHistTimeVsBC) {
+    //   entry.second->Reset();
+    // }
+    // for (auto& entry : mMapDebugHistTimeVsBCADC0) {
+    //   entry.second->Reset();
+    // }
+    // for (auto& entry : mMapDebugHistTimeVsBCADC1) {
+    //   entry.second->Reset();
+    // }
   }
+}
+
+bool AgingLaserTask::bcIsTrigger(int bc, int bcDelay) const
+{
+  for (const int bcTrg : mLaserTriggerBCs) {
+    if (bc == bcTrg + bcDelay) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool AgingLaserTask::bcIsDetector(int bc) const
+{
+  return bcIsTrigger(bc, mDetectorBCdelay);
 }
 
 bool AgingLaserTask::bcIsPeak1(int bc, int chId) const
 {
-  for (const int bcTrg : mLaserTriggerBCs) {
-    if (bc == bcTrg + mReferencePeak1BCdelays.at(chId)) {
-      return true;
-    }
-  }
-  return false;
+  return bcIsTrigger(bc, mReferencePeak1BCdelays.at(chId));
 }
 
 bool AgingLaserTask::bcIsPeak2(int bc, int chId) const
 {
-  for (const int bcTrg : mLaserTriggerBCs) {
-    if (bc == bcTrg + mReferencePeak2BCdelays.at(chId)) {
-      return true;
-    }
-  }
-  return false;
+  return bcIsTrigger(bc, mReferencePeak2BCdelays.at(chId));
 }
 
 } // namespace o2::quality_control_modules::ft0
