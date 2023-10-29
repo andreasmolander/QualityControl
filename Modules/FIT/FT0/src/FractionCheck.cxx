@@ -26,6 +26,8 @@
 
 #include <DataFormatsQualityControl/FlagReasons.h>
 #include "Common/Utils.h"
+
+#include <string.h>
 using namespace std;
 using namespace o2::quality_control;
 
@@ -50,7 +52,15 @@ void FractionCheck::configure()
     const std::string ccdbUrl = o2::quality_control_modules::common::getFromConfig<std::string>(mCustomParameters, "ccdbUrl", "o2-ccdb.internal");
     setCcdbUrl(ccdbUrl);
     const std::string mPathDeadChannelMap = o2::quality_control_modules::common::getFromConfig<std::string>(mCustomParameters, "pathDeadChannelMap", "FT0/Calib/DeadChannelMap");
-    mDeadChannelMap = retrieveConditionAny<o2::fit::DeadChannelMap>(mPathDeadChannelMap);
+    long ts = -1;
+    if (getActivity() != nullptr) {
+      ts = getActivity()->mValidity.getMax();
+    } else {
+      LOG(error) << "Config **************************** NULL ACTIVITY";
+    }
+    
+    LOG(info) << "Config *************************************************** Timestamp: " << ts;
+    mDeadChannelMap = retrieveConditionAny<o2::fit::DeadChannelMap>(mPathDeadChannelMap, {}, ts);
     for (unsigned chId = 0; chId < mDeadChannelMap->map.size(); chId++) {
       if (!mDeadChannelMap->isChannelAlive(chId)) {
         mIgnoreBins.insert(chId);
@@ -68,6 +78,23 @@ void FractionCheck::configure()
 Quality FractionCheck::check(std::map<std::string, std::shared_ptr<MonitorObject>>* moMap)
 {
   Quality result = Quality::Null;
+
+  long ts = -1;
+  // if (moMap->begin()->second->getMetadataMap().find("TFcreatoinTime") != moMap->begin()->second->getMetadataMap().end()) {
+  //   ts = std::stol(moMap->begin()->second->getMetadataMap().find("TFcreationTime"));
+  // }
+  // for (auto metadata : moMap->begin()->second->getMetadataMap()) {
+  //   if (metadata.first == "TFcreationTime") {
+  //     ts = std::stol(metadata.second);
+  //   }
+  // }
+  // ts = moMap->begin()->second->getMetadataMap().find("TFcreationTime")
+  if (getActivity() != nullptr) {
+    ts = getActivity()->mValidity.getMax();
+  } else {
+    LOG(error) << "**************************** NULL ACTIVITY";
+  }
+  LOG(info) << "*************************************************** Timestamp: " << ts;
 
   for (auto& [moName, mo] : *moMap) {
     (void)moName;

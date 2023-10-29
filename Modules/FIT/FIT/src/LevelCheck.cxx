@@ -34,16 +34,21 @@ using namespace o2::quality_control;
 namespace o2::quality_control_modules::fit
 {
 
-void LevelCheck::updateBinsToIgnoreWithDCM()
+void LevelCheck::updateBinsToIgnoreWithDCM(long timestamp)
 {
   if (mPathDeadChannelMap.size() > 0) {
-    const auto deadChannelMap = retrieveConditionAny<o2::fit::DeadChannelMap>(mPathDeadChannelMap);
+    const auto deadChannelMap = retrieveConditionAny<o2::fit::DeadChannelMap>(mPathDeadChannelMap, {}, timestamp);
     for (unsigned chID = 0; chID < deadChannelMap->map.size(); chID++) {
       if (!deadChannelMap->isChannelAlive(chID)) {
         mBinsToIgnore.insert(chID);
       }
     }
   }
+}
+
+void LevelCheck::updateBinsToIgnoreString()
+{
+  mBinsToIgnoreAsStr = std::to_string(mBinsToIgnore.size());
 }
 
 void LevelCheck::configure()
@@ -75,10 +80,14 @@ void LevelCheck::configure()
       mBinsToIgnore.insert(chId);
     }
   }
+  // long timestamp = getActivity()->mValidity.getMax();
+  long timestamp = -1;
+  ILOG(Error) << "************************************************************************ Timestamp: " << timestamp;
   // Automatic selection of bins to ignore
   // Dead channel map
-  updateBinsToIgnoreWithDCM();
-  mBinsToIgnoreAsStr = std::to_string(mBinsToIgnore.size());
+  updateBinsToIgnoreWithDCM(timestamp);
+  // Prepare list of bins to ignore as str
+  updateBinsToIgnoreString();
 }
 
 Quality LevelCheck::check(std::map<std::string, std::shared_ptr<MonitorObject>>* moMap)

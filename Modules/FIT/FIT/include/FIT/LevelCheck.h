@@ -10,7 +10,7 @@
 // or submit itself to any jurisdiction.
 
 ///
-/// \file   RatioCheck.h
+/// \file   LevelCheck.h
 /// \author Artur Furs afurs@cern.ch
 ///
 
@@ -38,7 +38,8 @@ class LevelCheck : public o2::quality_control::checker::CheckInterface
   std::string getAcceptedType() override;
 
  private:
-  void updateBinsToIgnoreWithDCM();
+  void updateBinsToIgnoreWithDCM(long timestamp = -1);
+  void updateBinsToIgnoreString();
 
   std::string mBinsToIgnoreAsStr{ "" };
   std::string mPathDeadChannelMap{ "" };
