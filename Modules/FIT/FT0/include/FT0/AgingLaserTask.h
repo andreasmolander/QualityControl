@@ -11,7 +11,7 @@
 
 ///
 /// \file   AgingLaserTask.h
-/// \author Sandor Lokos, Edmundo Garcia-Solis, Andreas Molander
+/// \author \author Sandor Lokos <sandor.lokos@cern.ch>, Edmundo Garcia-Solis <edmundo.garcia@cern.ch>, Andreas Molander <andreas.molander@cern.ch>
 ///
 
 #ifndef QC_MODULE_FT0_AGINGLASERTASK_H
@@ -52,11 +52,28 @@ class AgingLaserTask final : public TaskInterface
   void reset() override;
 
  private:
-  /// Check if BC is a laser trigger BC
+  /// Check if the laser was triggered for this BC
+  /// \param bc      BC to check
+  /// \param bcDelay Expected BC delay from trigger to signal
+  /// \return        True if the laser was triggered
   bool bcIsTrigger(int bc, int bcDelay) const;
+
+  /// Check if a detector signal is expected for this BC
+  /// \param bc BC to check
+  /// \return   True if a detector signal is expected
   bool bcIsDetector(int bc) const;
-  bool bcIsPeak1(int bc, int chId) const;
-  bool bcIsPeak2(int bc, int chId) const;
+
+  /// Check if the first reference signal is expected for this BC
+  /// \param bc      BC to check
+  /// \param refChId Rerernce channel where signal is seen
+  /// \return        True if the first reference signal is expected for this BC
+  bool bcIsPeak1(int bc, int refChId) const;
+
+  /// Check if the second reference signal is expected for this BC
+  /// \param bc      BC to check
+  /// \param refChId Rerernce channel where signal is seen
+  /// \return        True if the second reference signal is expected for this BC
+  bool bcIsPeak2(int bc, int refChId) const;
 
   // Constants
   constexpr static std::size_t sNCHANNELS_PM = o2::ft0::Constants::sNCHANNELS_PM; ///< Max number of FT0 channels
@@ -95,18 +112,17 @@ class AgingLaserTask final : public TaskInterface
   std::unique_ptr<TH2I> mDebugHistAmpVsCh; ///< Amplitude per channel (detector + reference channels)
 
   // Ampltidue histograms for reference channel peaks
-  std::map<uint8_t, std::unique_ptr<TH1I>> mMapDebugHistAmp;      ///< Amplitude (both ADCs and peaks)
-  std::map<uint8_t, std::unique_ptr<TH1I>> mMapDebugHistAmpADC0;  ///< Ampltidue for ADC0
-  std::map<uint8_t, std::unique_ptr<TH1I>> mMapDebugHistAmpADC1;  ///< Ampltidue for ADC1
-  std::map<uint8_t, std::unique_ptr<TH1I>> mMapDebugHistAmpPeak1; ///< Amplitude for peak 1 
-  std::map<uint8_t, std::unique_ptr<TH1I>> mMapDebugHistAmpPeak2; ///< Amplitude for peak 2
-  std::map<uint8_t, std::unique_ptr<TH1I>> mMapDebugHistAmpPeak1ADC0;
-  std::map<uint8_t, std::unique_ptr<TH1I>> mMapDebugHistAmpPeak1ADC1;
-  std::map<uint8_t, std::unique_ptr<TH1I>> mMapDebugHistAmpPeak2ADC0;
-  std::map<uint8_t, std::unique_ptr<TH1I>> mMapDebugHistAmpPeak2ADC1;
+  std::map<uint8_t, std::unique_ptr<TH1I>> mMapDebugHistAmp;          ///< Amplitude (both ADCs and peaks)
+  std::map<uint8_t, std::unique_ptr<TH1I>> mMapDebugHistAmpADC0;      ///< Ampltidue for ADC0
+  std::map<uint8_t, std::unique_ptr<TH1I>> mMapDebugHistAmpADC1;      ///< Ampltidue for ADC1
+  std::map<uint8_t, std::unique_ptr<TH1I>> mMapDebugHistAmpPeak1;     ///< Amplitude for peak 1 
+  std::map<uint8_t, std::unique_ptr<TH1I>> mMapDebugHistAmpPeak2;     ///< Amplitude for peak 2
+  std::map<uint8_t, std::unique_ptr<TH1I>> mMapDebugHistAmpPeak1ADC0; ///< Amplitude for peak 1 for ADC0
+  std::map<uint8_t, std::unique_ptr<TH1I>> mMapDebugHistAmpPeak1ADC1; ///< Amplitude for peak 1 for ADC1
+  std::map<uint8_t, std::unique_ptr<TH1I>> mMapDebugHistAmpPeak2ADC0; ///< Amplitude for peak 2 for ADC0
+  std::map<uint8_t, std::unique_ptr<TH1I>> mMapDebugHistAmpPeak2ADC1; ///< Amplitude for peak 2 for ADC1
 
   // Time per channel
-  // TODO: add mDebugHistTimeVsCh
   std::unique_ptr<TH2I> mDebugHistTimeVsChADC0;      ///< Time per channel for ADC0 (detector + reference channels)
   std::unique_ptr<TH2I> mDebugHistTimeVsChADC1;      ///< Time per channel for ADC1 (detector + reference channels)
   std::unique_ptr<TH2I> mDebugHistTimeVsChPeak1ADC0; ///< Time per channel for peak 1 for ADC0 (reference channels)

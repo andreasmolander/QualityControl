@@ -11,7 +11,7 @@
 
 ///
 /// \file   AgingLaserTask.cxx
-/// \author Sandor Lokos, Edmundo Garcia-Solis, Andreas Molander
+/// \author \author Sandor Lokos <sandor.lokos@cern.ch>, Edmundo Garcia-Solis <edmundo.garcia@cern.ch>, Andreas Molander <andreas.molander@cern.ch>
 ///
 
 #include "FT0/AgingLaserTask.h"
@@ -28,7 +28,6 @@
 #include <TH1I.h>
 #include <TH2I.h>
 
-#include <cstddef>
 #include <cstdint>
 #include <memory>
 #include <vector>
@@ -61,7 +60,7 @@ void AgingLaserTask::initialize(o2::framework::InitContext&)
     mReferenceChIDs = fit::helper::parseParameters<uint8_t>(referenceChannels, ",");
   } else {
     // Not specified, enable all
-    // (TODO: return with fatal if not specified, to avoid hard coded numbers?)
+    // TODO: return with fatal if not specified, to avoid hard coded numbers?
     for (uint8_t chId = 208; chId < 211; chId++) {
       mReferenceChIDs.push_back(chId);
     }
@@ -333,7 +332,7 @@ void AgingLaserTask::monitorData(o2::framework::ProcessingContext& ctx)
         bcHasReferenceChAmpCutADC1 = (isRef && isAmpCutOk && isADC1) || bcHasReferenceChAmpCutADC1;
       }
 
-      // Fill amplitude/time per channel histograms
+      // Fill amplitude and time per channel histograms
       if (mDebug) {
         mDebugHistAmpVsCh->Fill(chId, chAmp);
         isADC0 ? mDebugHistTimeVsChADC0->Fill(chId, chTime) : mDebugHistTimeVsChADC1->Fill(chId, chTime);
@@ -383,7 +382,7 @@ void AgingLaserTask::monitorData(o2::framework::ProcessingContext& ctx)
               }
               mHistAmpVsChPeak1ADC1->Fill(chId, chAmp);
             }
-          }
+          } // if bcIsPeak1
 
           // Amplitude/time peak 2
           if (bcIsPeak2(bc, chId)) {
@@ -408,7 +407,7 @@ void AgingLaserTask::monitorData(o2::framework::ProcessingContext& ctx)
               }
               mHistAmpVsChPeak2ADC1->Fill(chId, chAmp);
             }
-          }
+          } // if bcIsPeak2
         } // if isRefAmpCutOK
       } // if isRef
     } // channel loop
@@ -595,14 +594,14 @@ bool AgingLaserTask::bcIsDetector(int bc) const
   return bcIsTrigger(bc, mDetectorBCdelay);
 }
 
-bool AgingLaserTask::bcIsPeak1(int bc, int chId) const
+bool AgingLaserTask::bcIsPeak1(int bc, int refChId) const
 {
-  return bcIsTrigger(bc, mReferencePeak1BCdelays.at(chId));
+  return bcIsTrigger(bc, mReferencePeak1BCdelays.at(refChId));
 }
 
-bool AgingLaserTask::bcIsPeak2(int bc, int chId) const
+bool AgingLaserTask::bcIsPeak2(int bc, int refChId) const
 {
-  return bcIsTrigger(bc, mReferencePeak2BCdelays.at(chId));
+  return bcIsTrigger(bc, mReferencePeak2BCdelays.at(refChId));
 }
 
 } // namespace o2::quality_control_modules::ft0
