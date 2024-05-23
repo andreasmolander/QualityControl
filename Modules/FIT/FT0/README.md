@@ -1,5 +1,43 @@
 # FT0 quality control
 
+- [RecPoint QC](#recpoint-qc)
+  - [Output](#output)
+- [Aging monitoring](#aging-monitoring)
+  - [Monitoring principles](#monitoring-principles)
+  - [AgingLaserTask configuration](#aginglasertask-configuration)
+
+## RecPoint QC
+
+### Output
+
+#### Amplitude
+
+| Name                   | Type   | Description                           |
+|------------------------|--------|---------------------------------------|
+| `AmpPerChannel`        | `TH2F` | Amplitude per channel                 |
+| `Amp_vs_time_channelX` | `TH2F` | Amplitude vs time, channel X;Amp;Time |
+
+#### Time
+
+| Name                | Type   | Description                                |
+|---------------------|--------|--------------------------------------------|
+| `TimePerChannel`    | `TH2F` | Time per channel                           |
+| `CollTimeAC`        | `TH1F` | (T0A+T0C)/2;ps                             |
+| `CollTimeA`         | `TH1F` | T0A;ps                                     |
+| `CollTimeC`         | `TH1F` | T0C;ps                                     |
+| `SumTimeAC_perTrg`  | `TH2F` | (T0A+T0C)/2 per Trigger;Time [ps]; Trigger |
+| `DiffTimeAC_perTrg` | `TH2F` | (T0C-T0C)/2 per Trigger;Time [ps]; Trigger |
+| `TimeA_perTrg`      | `TH2F` | T0A per Trigger;Time [ps]; Trigger         |
+| `TimeC_perTrg`      | `TH2F` | T0C per Trigger;Time [ps]; Trigger         |
+| `ResCollTimeA`      | `TH1F` | (T0Aup-T0Adown)/2;ps                       |
+| `ResCollTimeC`      | `TH1F` | (T0Cup-T0Cdown)/2;ps                       |
+
+#### BC
+
+| Name             | Type   | Description                |
+|------------------|--------|----------------------------|
+| `BC_perTriggers` | `TH2F` | BC per Triggers;BC;Trigger |
+
 ## Aging monitoring
 
 The aging monitoring of FT0 is performed by 1 minute long laser runs that should be launched after each beam dump. A dedicated QC task is analyzing the laser data: `o2::quality_control_modules::ft0::AgingLaserTask`.
