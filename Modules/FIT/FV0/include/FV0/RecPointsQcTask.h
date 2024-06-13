@@ -47,9 +47,10 @@ class RecPointsQcTask final : public TaskInterface
 
   private:
   /// TODO: this is a dummy histogram, replace it with something meaningful
-  std::unique_ptr<TH1F> mHistogram = nullptr;
-  std::unique_ptr<TH2F> mHistAmp2Ch = nullptr;
-  std::unique_ptr<TH2F> mHistTime2Ch = nullptr;
+  std::unique_ptr<TH1F> mHistColTime = nullptr;
+  std::unique_ptr<TH1F> mHistColFirstTime = nullptr;
+  std::unique_ptr<TH1F> mHistColGloMeanTime = nullptr;
+  std::unique_ptr<TH1F> mHistColSelectedMeanTime = nullptr;
 };
 } // namespace o2::quality_control_modules::fv0
 
