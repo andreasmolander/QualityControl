@@ -16,6 +16,8 @@
 
 #include <TCanvas.h>
 #include <TH1.h>
+#include <TH2.h>
+#include <TROOT.h>
 
 #include "QualityControl/QcInfoLogger.h"
 #include "FV0/RecPointsQcTask.h"
@@ -44,8 +46,15 @@ void RecPointsQcTask::initialize(o2::framework::InitContext& /*ctx*/)
   //   ILOG(Debug, Devel) << "Custom parameter - myOwnKey: " << param->second << ENDM;
   // }
 
-  mHistogram = std::make_unique<TH1F>("Time", "FV0 mean time;Time (ps)", 500, -2050, 2050);
-  getObjectsManager()->startPublishing(mHistogram.get());
+  mHistColTime = std::make_unique<TH1F>("Time", "FV0 collision time;Time (ps)", 500, -2050, 2050);
+  mHistColFirstTime = std::make_unique<TH1F>("Time", "FV0 collision first time;Time (ps)", 500, -2050, 2050);
+  mHistColGloMeanTime = std::make_unique<TH1F>("Time", "FV0 collision global mean time;Time (ps)", 500, -2050, 2050);
+  mHistColSelectedMeanTime = std::make_unique<TH1F>("Time", "FV0 collision selected mean time;Time (ps)", 500, -2050, 2050);
+
+  getObjectsManager()->startPublishing(mHistColTime.get());
+  getObjectsManager()->startPublishing(mHistColFirstTime.get());
+  getObjectsManager()->startPublishing(mHistColGloMeanTime.get());
+  getObjectsManager()->startPublishing(mHistColSelectedMeanTime.get());
 
   // mHistogram = new TH1F("example", "example", 20, 0, 30000);
   // // this will make the two histograms published at the end of each cycle. no need to use the method in monitorData
@@ -65,7 +74,10 @@ void RecPointsQcTask::startOfActivity(const Activity& activity)
 {
   // // THIS FUNCTION BODY IS AN EXAMPLE. PLEASE REMOVE EVERYTHING YOU DO NOT NEED.
   // ILOG(Debug, Devel) << "startOfActivity " << activity.mId << ENDM;
-  mHistogram->Reset();
+  mHistColTime->Reset();
+  mHistColFirstTime->Reset();
+  mHistColGloMeanTime->Reset();
+  mHistColSelectedMeanTime->Reset();
 
   // // Example: retrieve custom parameters
   // std::string parameter;
@@ -88,7 +100,11 @@ void RecPointsQcTask::monitorData(o2::framework::ProcessingContext& ctx)
 {
   auto recpoints = ctx.inputs().get<gsl::span<o2::fv0::RecPoints>>("recpoints");
   for (const auto& recpoint : recpoints) {
-    mHistogram->Fill(recpoint.getCollisionGlobalMeanTime());
+    mHistColTime->Fill(recpoint.getCollisionTime());
+    mHistColFirstTime->Fill(recpoint.getCollisionFirstTime());
+    mHistColGloMeanTime->Fill(recpoint.getCollisionGlobalMeanTime());
+    mHistColSelectedMeanTime->Fill(recpoint.getCollisionSelectedMeanTime());
+
   }
   // // THIS FUNCTION BODY IS AN EXAMPLE. PLEASE REMOVE EVERYTHING YOU DO NOT NEED.
 
@@ -168,7 +184,10 @@ void RecPointsQcTask::reset()
   // clean all the monitor objects here
 
   ILOG(Debug, Devel) << "Resetting the histograms" << ENDM;
-  mHistogram->Reset();
+  mHistColTime->Reset();
+  mHistColFirstTime->Reset();
+  mHistColGloMeanTime->Reset();
+  mHistColSelectedMeanTime->Reset();
 }
 
 } // namespace o2::quality_control_modules::fv0
