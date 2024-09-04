@@ -19,6 +19,7 @@
 
 #include <memory>
 #include "QualityControl/TaskInterface.h"
+#include "FV0Base/Constants.h"
 
 #include <TH1.h>
 
@@ -31,6 +32,9 @@ namespace o2::quality_control_modules::fv0
 /// \author Andreas Molander, Fabiola Lugo
 class RecPointsQcTask final : public TaskInterface
 {
+ constexpr static std::size_t sNCHANNELS_FV0 = o2::fv0::Constants::nFv0Channels;
+ constexpr static std::size_t sNCHANNELS_FV0_PLUSREF = o2::fv0::Constants::nFv0ChannelsPlusRef;
+    
  public:
   /// \brief Constructor
   RecPointsQcTask() = default;
@@ -51,6 +55,7 @@ class RecPointsQcTask final : public TaskInterface
   std::unique_ptr<TH1F> mHistColFirstTime = nullptr;
   std::unique_ptr<TH1F> mHistColGloMeanTime = nullptr;
   std::unique_ptr<TH1F> mHistColSelectedMeanTime = nullptr;
+  std::unique_ptr<TH2F> mHistTime2Ch = nullptr;
 };
 } // namespace o2::quality_control_modules::fv0
 

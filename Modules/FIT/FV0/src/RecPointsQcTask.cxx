@@ -50,12 +50,16 @@ void RecPointsQcTask::initialize(o2::framework::InitContext& /*ctx*/)
   mHistColFirstTime = std::make_unique<TH1F>("Time", "FV0 collision first time;Time (ps)", 500, -2050, 2050);
   mHistColGloMeanTime = std::make_unique<TH1F>("Time", "FV0 collision global mean time;Time (ps)", 500, -2050, 2050);
   mHistColSelectedMeanTime = std::make_unique<TH1F>("Time", "FV0 collision selected mean time;Time (ps)", 500, -2050, 2050);
+  mHistTime2Ch = std::make_unique<TH2F>("TimePerChannel", "Time vs Channel;Channel;Time (ps)", sNCHANNELS_FV0_PLUSREF, 0, sNCHANNELS_FV0_PLUSREF, 4100, -2050, 2050);
+  mHistTime2Ch->SetOption("colz");
 
   getObjectsManager()->startPublishing(mHistColTime.get());
   getObjectsManager()->startPublishing(mHistColFirstTime.get());
   getObjectsManager()->startPublishing(mHistColGloMeanTime.get());
   getObjectsManager()->startPublishing(mHistColSelectedMeanTime.get());
-
+  getObjectsManager()->startPublishing(mHistTime2Ch.get());
+    
+    
   // mHistogram = new TH1F("example", "example", 20, 0, 30000);
   // // this will make the two histograms published at the end of each cycle. no need to use the method in monitorData
   // getObjectsManager()->startPublishing(mHistogram);
@@ -78,6 +82,7 @@ void RecPointsQcTask::startOfActivity(const Activity& activity)
   mHistColFirstTime->Reset();
   mHistColGloMeanTime->Reset();
   mHistColSelectedMeanTime->Reset();
+  mHistTime2Ch->Reset();
 
   // // Example: retrieve custom parameters
   // std::string parameter;
@@ -99,15 +104,22 @@ void RecPointsQcTask::startOfCycle()
 void RecPointsQcTask::monitorData(o2::framework::ProcessingContext& ctx)
 {
   auto recpoints = ctx.inputs().get<gsl::span<o2::fv0::RecPoints>>("recpoints");
+  auto channels = ctx.inputs().get<gsl::span<o2::fv0::ChannelDataFloat>>("channels");
+
   for (const auto& recpoint : recpoints) {
     mHistColTime->Fill(recpoint.getCollisionTime());
     mHistColFirstTime->Fill(recpoint.getCollisionFirstTime());
     mHistColGloMeanTime->Fill(recpoint.getCollisionGlobalMeanTime());
     mHistColSelectedMeanTime->Fill(recpoint.getCollisionSelectedMeanTime());
-
+      
+    const auto& vecChData = recpoint.getBunchChannelData(channels);
+    for (const auto& chData : vecChData) {
+        time[chData.channel] = chData.time;
+        mHistTime2Ch->Fill(static_cast<Double_t>(chData.channel), static_cast<Double_t>(chData.time));
+    }
   }
   // // THIS FUNCTION BODY IS AN EXAMPLE. PLEASE REMOVE EVERYTHING YOU DO NOT NEED.
-
+    
   // // In this function you can access data inputs specified in the JSON config file, for example:
   // //   "query": "random:ITS/RAWDATA/0"
   // // which is correspondingly <binding>:<dataOrigin>/<dataDescription>/<subSpecification
@@ -188,6 +200,7 @@ void RecPointsQcTask::reset()
   mHistColFirstTime->Reset();
   mHistColGloMeanTime->Reset();
   mHistColSelectedMeanTime->Reset();
+  mHistTime2Ch->Reset();
 }
 
 } // namespace o2::quality_control_modules::fv0
