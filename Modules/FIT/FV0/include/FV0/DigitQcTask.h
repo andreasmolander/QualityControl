@@ -11,8 +11,8 @@
 
 ///
 /// \file   DigitQcTask.h
-/// \author Artur Furs afurs@cern.ch
-/// \brief Quality Control DPL Task for FV0's digit visualization
+/// \author Artur Furs afurs@cern.ch, Andreas Molander andreas.molander@cern.ch
+/// \brief  Quality Control DPL Task for FV0's digit visualization
 
 #ifndef QC_MODULE_FV0_FV0DIGITQCTASK_H
 #define QC_MODULE_FV0_FV0DIGITQCTASK_H
@@ -146,45 +146,53 @@ class DigitQcTask final : public TaskInterface
   int mTrgChargeLevelHigh;
   int mTrgOrGate;
 
-  // Objects which will be published
-  std::unique_ptr<TH2F> mHistAmp2Ch;
-  std::unique_ptr<TH2F> mHistTime2Ch;
-  std::unique_ptr<TH2F> mHistEventDensity2Ch;
-  std::unique_ptr<TH2F> mHistChDataBits;
-  std::unique_ptr<TH2F> mHistOrbit2BC;
-  std::unique_ptr<TH1F> mHistBC;
-  std::unique_ptr<TH1F> mHistNchA;
-  std::unique_ptr<TH1F> mHistNchC;
-  std::unique_ptr<TH1F> mHistSumAmpA;
-  std::unique_ptr<TH1F> mHistSumAmpC;
-  std::unique_ptr<TH1F> mHistAverageTimeA;
-  std::unique_ptr<TH1F> mHistAverageTimeC;
-  std::unique_ptr<TH1F> mHistChannelID;
+  // MonitorObjects
+  
+  // Amplitude
+  std::unique_ptr<TH2F> mHistAmpPerCh;
+  std::unique_ptr<TH1F> mHistSumAmp;
   std::unique_ptr<TH1F> mHistCFDEff;
-  std::unique_ptr<TH1F> mHistGateTimeRatio2Ch;
-  //  std::unique_ptr<TH2F> mHistTimeSum2Diff;
-  std::unique_ptr<TH2F> mHistTriggersCorrelation;
-  std::unique_ptr<TH1D> mHistCycleDuration;
-  std::unique_ptr<TH1D> mHistCycleDurationNTF;
-  std::unique_ptr<TH1D> mHistCycleDurationRange;
-  std::map<unsigned int, TH1F*> mMapHistAmp1D;
-  std::map<unsigned int, TH1F*> mMapHistTime1D;
-  std::map<unsigned int, TH1F*> mMapHistPMbits;
+  std::unique_ptr<TH2F> mHistSumAmpPmVsTcm;
+  std::map<unsigned int, TH1F*> mMapHistAmp;
   std::map<unsigned int, TH2F*> mMapHistAmpVsTime;
+
+  // Time
+  std::unique_ptr<TH2F> mHistTimePerCh;
+  std::unique_ptr<TH1F> mHistAverageTime;
+  std::unique_ptr<TH1F> mHistTimeGateRatioPerCh;
+  std::unique_ptr<TH2F> mHistAverageTimePmVsTcm;
+  std::map<unsigned int, TH1F*> mMapHistTime;
+
+  // Channels
+  std::unique_ptr<TH1F> mHistChannelID;
+  std::unique_ptr<TH1F> mHistNCh;
+  std::unique_ptr<TH2F> mHistChDataBits;
+  std::unique_ptr<TH2F> mHistEventDensityPerCh;
+  std::unique_ptr<TH2F> mHistNChPmVsTcm;
+  std::map<unsigned int, TH1F*> mMapHistChDataBits;
+
+  // Triggers
+  std::unique_ptr<TH1F> mHistTriggersSw;
+  std::unique_ptr<TH2F> mHistTriggersCorrelation;
+  std::unique_ptr<TH2F> mHistTriggersSoftwareVsTCM;
+
+  // BC & orbit
+  std::unique_ptr<TH1F> mHistBC;
   std::unique_ptr<TH2F> mHistBCvsTrg;
-  std::unique_ptr<TH2F> mHistBCvsFEEmodules;
+  std::unique_ptr<TH2F> mHistBCvsFee;
   std::unique_ptr<TH2F> mHistBcVsFeeForOrATrg;
   std::unique_ptr<TH2F> mHistBcVsFeeForOrAOutTrg;
   std::unique_ptr<TH2F> mHistBcVsFeeForNChanTrg;
   std::unique_ptr<TH2F> mHistBcVsFeeForChargeTrg;
   std::unique_ptr<TH2F> mHistBcVsFeeForOrAInTrg;
+  std::unique_ptr<TH2F> mHistOrbitVsBC;
   std::unique_ptr<TH2F> mHistOrbitVsTrg;
-  std::unique_ptr<TH2F> mHistOrbitVsFEEmodules;
-  std::unique_ptr<TH2F> mHistPmTcmNchA;
-  std::unique_ptr<TH2F> mHistPmTcmSumAmpA;
-  std::unique_ptr<TH2F> mHistPmTcmAverageTimeA;
-  std::unique_ptr<TH1F> mHistTriggersSw;
-  std::unique_ptr<TH2F> mHistTriggersSoftwareVsTCM;
+  std::unique_ptr<TH2F> mHistOrbitVsFee;
+
+  // Cycles
+  std::unique_ptr<TH1D> mHistCycleDuration;
+  std::unique_ptr<TH1D> mHistCycleDurationNTF;
+  std::unique_ptr<TH1D> mHistCycleDurationRange;
 
   // Hashed maps
   static const size_t mapSize = 256;

@@ -112,7 +112,7 @@ class RecPointsQcTask final : public TaskInterface
   std::unique_ptr<TH2F> mVertexVsCollTimeVertexTrigger;
   std::unique_ptr<TH2F> mVertexNsVsCollTimeVertexTrigger;
   std::unique_ptr<TH2F> mTimeAvsTimeC;
-  std::unique_ptr<TH1F> mHistCollTimeAC;
+  // std::unique_ptr<TH1F> mHistCollTimeAC;
   std::unique_ptr<TH1F> mHistCollTimeA;
   std::unique_ptr<TH1F> mHistCollTimeC;
   std::unique_ptr<TH1F> mHistBC;
