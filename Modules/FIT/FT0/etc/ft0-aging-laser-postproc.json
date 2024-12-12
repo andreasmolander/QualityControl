@@ -1,0 +1,181 @@
+{
+  "qc": {
+    "config": {
+      "database": {
+        "implementation": "CCDB",
+        "host": "ccdb-test.cern.ch:8080",
+        "#host": "http://localhost:8080"
+      },
+      "conditionDB": {
+        "url": "alice-ccdb.cern.ch"
+      }
+    },
+    "postprocessing": {
+      "AgingLaserPostProc": {
+        "active": "true",
+        "className": "o2::quality_control_modules::ft0::AgingLaserPostProc",
+        "moduleName": "QcFT0",
+        "detectorName": "FT0",
+        "extendedTaskParameters": {
+          "default": {
+            "default": {
+              "adcPerMIP": "14",
+              "#detectorChannelIDs": "omit to use all",
+              "referenceChannelIDs": "208, 210, 211",
+              "reset": "false"
+            }
+          }
+        },
+        "grpGeomRequest" : {
+          "geomRequest": "None",     "": "Available options are \"None\", \"Aligned\", \"Ideal\", \"Alignements\"",
+          "askGRPECS": "false",
+          "askGRPLHCIF": "false",
+          "askGRPMagField": "false",
+          "askMatLUT": "false",
+          "askTime": "false",
+          "askOnceAllButField": "false",
+          "needPropagatorD":  "false"
+        },
+        "initTrigger": [ "once" ],
+        "updateTrigger": [ "newobject:qcdb:FT0/MO/AgingLaser/AmpPerChannel" ],
+        "stopTrigger": [ ]
+      },
+      "AgingLaserTrending": {
+        "active": "true",
+        "className": "o2::quality_control::postprocessing::SliceTrendingTask",
+        "moduleName": "QualityControl",
+        "detectorName": "FT0",
+        "resumeTrend": "true",
+        "producePlotsOnUpdate": "true",
+        "#trendingTimestamp": "validFrom",
+        "dataSources": [
+          {
+            "type": "repository",
+            "path": "FT0/MO/AgingLaserPostProc",
+            "names": [ "AmpPerChannelStatMean", "AmpPerChannelNormStatMean", "AmpPerChannelNormStatMeanCorrected" ],
+            "reductorName": "o2::quality_control_modules::common::TH1SliceReductor",
+            "#axisDivision": [ ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47", "48", "49", "50", "51", "52", "53", "54", "55", "56", "57", "58", "59", "60", "61", "62", "63", "64", "65", "66", "67", "68", "69", "70", "71", "72", "73", "74", "75", "76", "77", "78", "79", "80", "81", "82", "83", "84", "85", "86", "87", "88", "89", "90", "91", "92", "93", "94", "95", "96", "97", "98", "99", "100", "101", "102", "103", "104", "105", "106", "107", "108", "109", "110", "111", "112", "113", "114", "115", "116", "117", "118", "119", "120", "121", "122", "123", "124", "125", "126", "127", "128", "129", "130", "131", "132", "133", "134", "135", "136", "137", "138", "139", "140", "141", "142", "143", "144", "145", "146", "147", "148", "149", "150", "151", "152", "153", "154", "155", "156", "157", "158", "159", "160", "161", "162", "163", "164", "165", "166", "167", "168", "169", "170", "171", "172", "173", "174", "175", "176", "177", "178", "179", "180", "181", "182", "183", "184", "185", "186", "187", "188", "189", "190", "191", "192", "193", "194", "195", "196", "197", "198", "199", "200", "201", "202", "203", "204", "205", "206", "207", "208", "209", "210", "211", "212" ] ],
+            "axisDivision": [ ["0", "1", "2", "3" ] ],
+            "sliceLabels": [ [ "0", "1", "2" ] ],
+            "moduleName": "QcCommon"
+          }
+        ],
+        "plots": [
+          {
+            "name": "test_trend_mean_amp_per_channel_vs_multigraphtime",
+            "title": "Amplitude stat. mean (ADC ch)",
+            "varexp": "AmpPerChannelStatMean.meanY:multigraphtime",
+            "selection": "",
+            "option": "*L",
+            "graphAxisLabel": "Amplitude stat. mean (ADC ch):time"
+          },
+          {
+            "name": "test_trend_mean_amp_per_channel_vs_time",
+            "title": "Amplitude stat. mean (ADC ch)",
+            "varexp": "AmpPerChannelStatMean.meanY:time",
+            "selection": "",
+            "option": "*L",
+            "graphAxisLabel": "Amplitude stat. mean (ADC ch):time"
+          },
+          {
+            "name": "test_trend_mean_amp_norm_per_channel_vs_multigraphtime",
+            "title": "Amplitude stat. mean normalized by ref ch (ADC ch)",
+            "varexp": "AmpPerChannelNormStatMean.meanY:multigraphtime",
+            "selection": "",
+            "option": "*L",
+            "graphAxisLabel": "Amplitude stat. mean normalized by ref ch (ADC ch):time"
+          },
+          {
+            "name": "test_trend_mean_amp_norm_per_channel_corrected_vs_multigraphtime",
+            "title": "Amplitude stat. mean normalized by ref ch corrected (ADC ch)",
+            "varexp": "AmpPerChannelNormStatMeanCorrected.meanY:multigraphtime",
+            "selection": "",
+            "option": "*L",
+            "graphAxisLabel": "Amplitude stat. mean normalized by ref ch corrected (ADC ch):time"
+          }
+        ],
+        "initTrigger": [ "once" ],
+        "updateTrigger": [ "newobject:qcdb:FT0/MO/AgingLaserPostProc/AmpPerChannelStatMean" ],
+        "stopTrigger": [ ]
+      },
+      "AgingLaserTrendingTestOLD": {
+        "active": "false",
+        "className": "o2::quality_control::postprocessing::SliceTrendingTask",
+        "moduleName": "QualityControl",
+        "detectorName": "FT0",
+        "resumeTrend": "true",
+        "producePlotsOnUpdate": "true",
+        "dataSources": [
+          {
+            "type": "repository",
+            "path": "FT0/MO/AgingLaser",
+            "names": [ "AmpPerChannelADC0", "AmpPerChannelADC1" ],
+            "reductorName": "o2::quality_control_modules::common::TH2SliceReductor",
+            "#axisDivision": [ ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47", "48", "49", "50", "51", "52", "53", "54", "55", "56", "57", "58", "59", "60", "61", "62", "63", "64", "65", "66", "67", "68", "69", "70", "71", "72", "73", "74", "75", "76", "77", "78", "79", "80", "81", "82", "83", "84", "85", "86", "87", "88", "89", "90", "91", "92", "93", "94", "95", "96", "97", "98", "99", "100", "101", "102", "103", "104", "105", "106", "107", "108", "109", "110", "111", "112", "113", "114", "115", "116", "117", "118", "119", "120", "121", "122", "123", "124", "125", "126", "127", "128", "129", "130", "131", "132", "133", "134", "135", "136", "137", "138", "139", "140", "141", "142", "143", "144", "145", "146", "147", "148", "149", "150", "151", "152", "153", "154", "155", "156", "157", "158", "159", "160", "161", "162", "163", "164", "165", "166", "167", "168", "169", "170", "171", "172", "173", "174", "175", "176", "177", "178", "179", "180", "181", "182", "183", "184", "185", "186", "187", "188", "189", "190", "191", "192", "193", "194", "195", "196", "197", "198", "199", "200", "201", "202", "203", "204", "205", "206", "207", "208", "209", "210", "211", "212" ], [ "0", "4100"] ],
+            "axisDivision": [ ["0", "1", "2", "3" ], [ "0", "4100"] ],
+            "moduleName": "QcCommon"
+          },
+          {
+            "type": "repository",
+            "path": "FT0/MO/AgingLaser",
+            "names": [ "AmpAllRefChPeak1ADC0", "AmpAllRefChPeak1ADC1" ],
+            "reductorName": "o2::quality_control_modules::common::TH2SliceReductor",
+            "axisDivision": [ ["208", "212" ], [ "0", "4100"] ],
+            "moduleName": "QcCommon"
+          }
+        ],
+        "plots": [
+          {
+            "name": "test_trend_mean_amp_per_channel_adc0",
+            "title": "Mean ampltidue trend per channel for ADC0 (test)",
+            "varexp": "AmpPerChannelADC0.meanY:multigraphtime",
+            "selection": "",
+            "option": "*L",
+            "graphAxisLabel": "Mean amplitude (ADC ch):time"
+          },
+          {
+            "name": "test_trend_mean_amp_norm_per_channel_adc0",
+            "title": "Mean ampltidue trend per channel for ADC0 (test)",
+            "varexp": "((AmpPerChannelADC0.meanY)/(AmpAllRefChPeak1ADC0.meanY)):multigraphtime",
+            "selection": "",
+            "option": "*L",
+            "graphAxisLabel": "Mean normalized amplitude (ADC ch):time"
+          }
+        ],
+        "initTrigger": [ "once" ],
+        "updateTrigger": [ "newobject:qcdb:FT0/MO/AgingLaser/AmpPerChannelADC0" ],
+        "stopTrigger": []
+      },
+      "DISABLEDAgingLaserTestTrend": {
+        "active": "false",
+        "className": "o2::quality_control::postprocessing::TrendingTask",
+        "moduleName": "QualityControl",
+        "detectorName": "FT0",
+        "resumeTrend": "true",
+        "producePlotsOnUpdate": "true",
+        "dataSources": [
+          {
+            "type": "repository",
+            "path": "FT0/MO/AgingLaser",
+            "names": [ "AmpCh208Peak1ADC0" ],
+            "reductorName": "o2::quality_control_modules::common::TH1Reductor",
+            "moduleName": "QcCommon"
+          }
+        ],
+        "plots": [
+          {
+            "name": "mean_of_AmpCh208Peak1ADC0_test",
+            "title": "Mean trend of AmpCh208Peak1ADC0 (test)",
+            "varexp": "AmpCh208Peak1ADC0.mean:time",
+            "selection": "",
+            "option": "*L",
+            "graphAxisLabel": "Mean X: time"
+          }
+        ],
+        "initTrigger": [ "once" ],
+        "updateTrigger": [ "5 seconds" ],
+        "stopTrigger": []
+      }
+    }
+  }
+}

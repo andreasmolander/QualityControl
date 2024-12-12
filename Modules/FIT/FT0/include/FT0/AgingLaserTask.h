@@ -29,7 +29,6 @@
 #include <cstdint>
 #include <map>
 #include <memory>
-#include <set>
 #include <vector>
 
 using namespace o2::quality_control::core;
@@ -94,6 +93,7 @@ class AgingLaserTask final : public TaskInterface
   // Histograms
 
   // Amplitude per channel
+  std::unique_ptr<TH2I> mHistAmpVsCh;          ///< Amplitude per channel (detector + reference channels)
   std::unique_ptr<TH2I> mHistAmpVsChADC0;      ///< Amplitude per channel for ADC0 (detector + reference channels)
   std::unique_ptr<TH2I> mHistAmpVsChADC1;      ///< Amplitude per channel for ADC1 (detector + reference channels)
   std::unique_ptr<TH2I> mHistAmpVsChPeak1ADC0; ///< Amplitude per channel for peak 1 for ADC0 (reference channels)
@@ -107,9 +107,6 @@ class AgingLaserTask final : public TaskInterface
   std::unique_ptr<TH2I> mHistTimeVsChPeak2; ///< Time per channel for peak 2 (reference channels, both ADCs)
 
   // Debug histograms
-
-  // Ampltiude per channel
-  std::unique_ptr<TH2I> mDebugHistAmpVsCh; ///< Amplitude per channel (detector + reference channels)
 
   // Ampltidue histograms for reference channel peaks
   std::map<uint8_t, std::unique_ptr<TH1I>> mMapDebugHistAmp;          ///< Amplitude (both ADCs and peaks)

@@ -3,6 +3,7 @@
 add_library(O2QcFT0)
 
 target_sources(O2QcFT0 PRIVATE src/AgingLaserTask.cxx
+                               src/AgingLaserPostProc.cxx
                                src/DigitQcTask.cxx
                                src/GenericCheck.cxx
                                src/CFDEffCheck.cxx
@@ -33,6 +34,7 @@ install(TARGETS O2QcFT0
 
 add_root_dictionary(O2QcFT0
   HEADERS include/FT0/AgingLaserTask.h
+          include/FT0/AgingLaserPostProc.h
           include/FT0/DigitQcTask.h
           include/FT0/PostProcTask.h
           include/FT0/CFDEffCheck.h
@@ -96,7 +98,8 @@ endforeach()
 # ----- Configs -------
 install(FILES
         ft0-reconstruction-config.json
-        etc/ft0-aging-laser.json
+        etc/ft0-aging-laser-task.json
+        etc/ft0-aging-laser-postproc.json
         DESTINATION etc)
 
 get_property(dirs

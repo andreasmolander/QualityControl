@@ -3,23 +3,16 @@
     "config": {
       "database": {
         "implementation": "CCDB",
-        "#host": "ccdb-test.cern.ch:8080",
-        "host": "http://localhost:8080",
-        "username": "not_applicable",
-        "password": "not_applicable",
-        "name": "not_applicable"
-      },
-      "monitoring": {
-        "url": "infologger:///debug?qc"
-      },
-      "consul": {
-        "url": ""
+        "host": "ccdb-test.cern.ch:8080",
+        "#host": "http://localhost:8080"
       },
       "conditionDB": {
         "url": "alice-ccdb.cern.ch"
       },
-      "bookkeeping": {
-        "url": ""
+      "#Activity": {
+        "number": "555978",
+        "start": "1724041251000",
+        "end": "1724041332000"
       }
     },
     "tasks": {
@@ -28,7 +21,8 @@
         "className": "o2::quality_control_modules::ft0::AgingLaserTask",
         "moduleName": "QcFT0",
         "detectorName": "FT0",
-        "cycleDurationSeconds": "300",
+        "#cycleDurationSeconds": "300",
+        "cycleDurationSeconds": "60",
         "maxNumberCycles": "-1",
         "dataSource": {
           "type": "direct",
@@ -37,14 +31,15 @@
         "taskParameters": {
           "#detectorChannelIDs": "omit to use all",
           "referenceChannelIDs": "208, 209, 210, 211",
-          "detectorAmpCut": "0",
-          "referenceAmpCut": "100",
+          "#detectorAmpCut": "not to be used",
+          "#referenceAmpCut": "not to be used",
           "laserTriggerBCs": "0, 1783",
           "detectorBCdelay": "131",
           "referencePeak1BCdelays": "115, 115, 115, 115",
           "referencePeak2BCdelays": "136, 142, 135, 141",
           "debug": "false"
-        }
+        },
+        "#saveObjectsToFile": "ft0_aging_qc.root"
       }
     }
   }
