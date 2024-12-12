@@ -11,8 +11,12 @@ target_sources(O2QcFV0 PRIVATE src/TH1ReductorLaser.cxx
                                src/OutOfBunchCollCheck.cxx
                                src/TriggersSwVsTcmCheck.cxx
                                src/OutOfBunchCollFeeModulesCheck.cxx
+<<<<<<< Updated upstream
                                src/RecPointsQcTask.cxx
                                src/MeanCheck.cxx)
+=======
+                               src/RecPointsQcTask.cxx)
+>>>>>>> Stashed changes
 
 target_include_directories(
   O2QcFV0
@@ -43,7 +47,10 @@ add_root_dictionary(O2QcFV0
           include/FV0/TriggersSwVsTcmCheck.h
           include/FV0/OutOfBunchCollFeeModulesCheck.h
           include/FV0/RecPointsQcTask.h
+<<<<<<< Updated upstream
           include/FV0/MeanCheck.h
+=======
+>>>>>>> Stashed changes
   LINKDEF include/FV0/LinkDef.h)
 
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/FV0
