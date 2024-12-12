@@ -35,6 +35,23 @@
           "query": "recpoints:FV0/RECPOINTS/0;channels:FV0/RECCHDATA/0"
         }
       }
+    },
+    "checks": {
+      "RecPointTimeMean": {
+        "active": "true",
+        "className": "o2::quality_control_modules::fv0::MeanCheck",
+        "moduleName": "QcFV0",
+        "detectorName": "FV0",
+        "policy": "OnAny",
+        "dataSource": [{
+          "type": "Task",
+          "name": "RecPoints",
+          "MOs": ["Time"]
+        }],
+        "checkParameters": {
+          "limit": "50"
+        }
+      }
     }
   }
 }

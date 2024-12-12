@@ -16,4 +16,6 @@
 
 #pragma link C++ class o2::quality_control_modules::fv0::DigitQcTaskLaser + ;
 #pragma link C++ class o2::quality_control_modules::fv0::TH1ReductorLaser + ;
+
+#pragma link C++ class o2::quality_control_modules::fv0::MeanCheck+;
 #endif
