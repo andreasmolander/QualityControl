@@ -74,14 +74,27 @@ class PostProcTask final : public quality_control::postprocessing::PostProcessin
   std::unique_ptr<TH1F> mHistTimeInWindow;
   std::unique_ptr<TH1F> mHistCFDEff;
   std::unique_ptr<TH1F> mHistChannelID_outOfBC;
+  std::unique_ptr<TH1F> mHistChannelID;
+  std::unique_ptr<TH1F> mHistChannelPMBit;
+  std::unique_ptr<TH1F> mHistPMBits;
   std::unique_ptr<TH1F> mHistTrg_outOfBC;
   std::unique_ptr<TH1F> mHistTrgValidation;
   std::unique_ptr<TH2F> mHistBcPattern;
   std::unique_ptr<TH2F> mHistBcTrgOutOfBunchColl;
   std::unique_ptr<TProfile> mAmpl;
   std::unique_ptr<TProfile> mTime;
-  std::unique_ptr<TH2Poly> mHistStatsSideA;
-  std::unique_ptr<TH2Poly> mHistStatsSideC;
+  std::unique_ptr<TH2Poly> mHistChannelMapSideA;
+  std::unique_ptr<TH2Poly> mHistChannelMapSideC;
+  std::unique_ptr<TH2Poly> mHistOccupancySideA;
+  std::unique_ptr<TH2Poly> mHistOccupancySideC;
+  std::unique_ptr<TH2Poly> mHistAmplitudeSideA;
+  std::unique_ptr<TH2Poly> mHistAmplitudeSideC;
+  std::unique_ptr<TH2Poly> mHistTimeSideA;
+  std::unique_ptr<TH2Poly> mHistTimeSideC;
+  std::unique_ptr<TH2Poly> mHistRatesSideA;
+  std::unique_ptr<TH2Poly> mHistRatesSideC;
+  std::unique_ptr<TH2Poly> mHistPMBitRatesSideA;
+  std::unique_ptr<TH2Poly> mHistPMBitRatesSideC;
 
   /// Sum of count in bins vs amplitude for detector channels 0 to 31 (A-side inner).
   /// In other words a projection of range 1-32 in the 2D histogram amplitude vs channel
@@ -108,7 +121,9 @@ class PostProcTask final : public quality_control::postprocessing::PostProcessin
   int mLowTimeThreshold{ -192 };
   int mUpTimeThreshold{ 192 };
   std::string mAsynchChannelLogic{ "standard" };
-  //
+  // Geo monitor
+  int iBitPM{ 2 };
+
   void setTimestampToMOs();
   // TO REMOVE
   std::vector<unsigned int> mVecChannelIDs{};

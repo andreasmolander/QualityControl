@@ -57,6 +57,7 @@ void PostProcTask::configure(const boost::property_tree::ptree& config)
   mLowTimeThreshold = helper::getConfigFromPropertyTree<int>(config, cfgPath("lowTimeThreshold"), -192);
   mUpTimeThreshold = helper::getConfigFromPropertyTree<int>(config, cfgPath("upTimeThreshold"), 192);
   mAsynchChannelLogic = helper::getConfigFromPropertyTree<std::string>(config, cfgPath("asynchChannelLogic"), "standard");
+  iBitPM = helper::getConfigFromPropertyTree<int>(config, cfgPath("PMBit"), 2);
   mIsFirstIter = true; // to be sure
 
   // TO REMOVE
@@ -99,6 +100,7 @@ void PostProcTask::initialize(Trigger trg, framework::ServiceRegistryRef service
 
   mHistChDataNOTbits = helper::registerHist<TH2F>(getObjectsManager(), quality_control::core::PublicationPolicy::ThroughStop, "COLZ", "ChannelDataNegBits", "ChannelData NOT PM bits per ChannelID;Channel;Negative bit", sNCHANNELS_PM, 0, sNCHANNELS_PM, mMapPMbits);
   mHistTriggers = helper::registerHist<TH1F>(getObjectsManager(), quality_control::core::PublicationPolicy::ThroughStop, "", "Triggers", "Triggers from TCM", mMapTechTrgBitsExtra);
+  mHistPMBits = helper::registerHist<TH1F>(getObjectsManager(), quality_control::core::PublicationPolicy::ThroughStop, "", "PMTriggers", "PM bits", mMapPMbits);
   mHistTriggerRates = helper::registerHist<TH1F>(getObjectsManager(), quality_control::core::PublicationPolicy::ThroughStop, "HIST", "TriggerRates", "Trigger rates; Triggers; Rate [kHz]", mMapTechTrgBitsExtra);
   mHistBcTrgOutOfBunchColl = helper::registerHist<TH2F>(getObjectsManager(), quality_control::core::PublicationPolicy::ThroughStop, "COLZ", "OutOfBunchColl_BCvsTrg", "BC vs Triggers for out-of-bunch collisions;BC;Triggers", sBCperOrbit, 0, sBCperOrbit, mMapTechTrgBitsExtra);
   mHistBcPattern = helper::registerHist<TH2F>(getObjectsManager(), quality_control::core::PublicationPolicy::ThroughStop, "COLZ", "bcPattern", "BC pattern", sBCperOrbit, 0, sBCperOrbit, mMapTechTrgBitsExtra);
@@ -114,14 +116,62 @@ void PostProcTask::initialize(Trigger trg, framework::ServiceRegistryRef service
   mHistAmpC = helper::registerHist<TH1F>(getObjectsManager(), quality_control::core::PublicationPolicy::ThroughStop, "", "AmpC", "FT0 C-side channel ampltitudes (ch 96-207);Channel amplitude (ADC ch);Counts", 4200, -100, 4100);
   mHistAmpNormPerChannel = helper::registerHist<TH1F>(getObjectsManager(), quality_control::core::PublicationPolicy::ThroughStop, "", "AmpNormPerChannel", "FT0 channel amplitudes normalized per channel (ch 0-207);Channel amplitude (ADC ch);#sum_{ch}AmpHist_{ch} #times (1/counts_{ch})", 4200, -100, 4100);
   mHistAmpNormPerChannel->Sumw2(kFALSE);
-  mChannelGeometry.init(-200., 200., -200., 200., 10.); // values - borders for hist and margin
 
-  mHistStatsSideA = mChannelGeometry.makeHistSideA("GeoChannelStatA", "Channel occupancy, side-A");
-  mHistStatsSideC = mChannelGeometry.makeHistSideC("GeoChannelStatC", "Channel occupancy, side-C");
-  getObjectsManager()->startPublishing(mHistStatsSideA.get());
-  getObjectsManager()->setDefaultDrawOptions(mHistStatsSideA.get(), "TEXT COLZ L");
-  getObjectsManager()->startPublishing(mHistStatsSideC.get());
-  getObjectsManager()->setDefaultDrawOptions(mHistStatsSideC.get(), "TEXT COLZ L");
+  mHistChannelID = helper::registerHist<TH1F>(getObjectsManager(), quality_control::core::PublicationPolicy::ThroughStop, "", "ChannelID", "ChannelID", sNCHANNELS_PM, 0, sNCHANNELS_PM);
+  string PMBitName = mHistPMBits->GetXaxis()->GetBinLabel(iBitPM);
+  string hstTitle = "Channel data PM Bit " + PMBitName;
+  mHistChannelPMBit = helper::registerHist<TH1F>(getObjectsManager(), quality_control::core::PublicationPolicy::ThroughStop, "", "ChannelPMBit", hstTitle, sNCHANNELS_PM, 0, sNCHANNELS_PM);
+  getObjectsManager()->startPublishing(mHistChannelPMBit.get());
+
+  mChannelGeometry.init(-200., 200., -200., 200., 13.); // values - borders for hist and margin
+  for (int ichannel = 0; ichannel < sNCHANNELS_PM; ichannel++) {
+    mHistChannelID->Fill(ichannel, ichannel + 1);
+  }
+
+  mHistChannelMapSideA = mChannelGeometry.makeHistSideA("GeoChannelMapA", "Channel Map, side-A");
+  mHistChannelMapSideC = mChannelGeometry.makeHistSideC("GeoChannelMapC", "Channel Map, side-C");
+  getObjectsManager()->startPublishing(mHistChannelMapSideA.get());
+  getObjectsManager()->setDefaultDrawOptions(mHistChannelMapSideA.get(), "TEXT COLZ L");
+  getObjectsManager()->startPublishing(mHistChannelMapSideC.get());
+  getObjectsManager()->setDefaultDrawOptions(mHistChannelMapSideC.get(), "TEXT COLZ L");
+
+  mHistOccupancySideA = mChannelGeometry.makeHistSideA("GeoOccupancyA", "Channel Occupancy, side-A");
+  mHistOccupancySideC = mChannelGeometry.makeHistSideC("GeoOccupancyC", "Channel Occupancy, side-C");
+  getObjectsManager()->startPublishing(mHistOccupancySideA.get());
+  getObjectsManager()->setDefaultDrawOptions(mHistOccupancySideA.get(), "TEXT COLZ L");
+  getObjectsManager()->startPublishing(mHistOccupancySideC.get());
+  getObjectsManager()->setDefaultDrawOptions(mHistOccupancySideC.get(), "TEXT COLZ L");
+
+  mHistAmplitudeSideA = mChannelGeometry.makeHistSideA("GeoAmplitudeA", "Channel Amplitude, side-A");
+  mHistAmplitudeSideC = mChannelGeometry.makeHistSideC("GeoAmplitudeC", "Channel Amplitude, side-C");
+  getObjectsManager()->startPublishing(mHistAmplitudeSideA.get());
+  getObjectsManager()->setDefaultDrawOptions(mHistAmplitudeSideA.get(), "TEXT COLZ L");
+  getObjectsManager()->startPublishing(mHistAmplitudeSideC.get());
+  getObjectsManager()->setDefaultDrawOptions(mHistAmplitudeSideC.get(), "TEXT COLZ L");
+
+  mHistTimeSideA = mChannelGeometry.makeHistSideA("GeoTimeA", "Channel Time, side-A");
+  mHistTimeSideC = mChannelGeometry.makeHistSideC("GeoTimeC", "Channel Time, side-C");
+  getObjectsManager()->startPublishing(mHistTimeSideA.get());
+  getObjectsManager()->setDefaultDrawOptions(mHistTimeSideA.get(), "TEXT COLZ L");
+  getObjectsManager()->startPublishing(mHistTimeSideC.get());
+  getObjectsManager()->setDefaultDrawOptions(mHistTimeSideC.get(), "TEXT COLZ L");
+
+  mHistRatesSideA = mChannelGeometry.makeHistSideA("GeoRatesA", "Channel Hit Rates [kHz], side-A");
+  mHistRatesSideC = mChannelGeometry.makeHistSideC("GeoRatesC", "Channel Hit Rates [kHz], side-C");
+  getObjectsManager()->startPublishing(mHistRatesSideA.get());
+  getObjectsManager()->setDefaultDrawOptions(mHistRatesSideA.get(), "TEXT COLZ L");
+  getObjectsManager()->startPublishing(mHistRatesSideC.get());
+  getObjectsManager()->setDefaultDrawOptions(mHistRatesSideC.get(), "TEXT COLZ L");
+
+  string hstTitleA = "Channel Rates PM Bit " + PMBitName + "side-A";
+  string hstTitleC = "Channel Rates PM Bit " + PMBitName + "side-C";
+
+  mHistPMBitRatesSideA = mChannelGeometry.makeHistSideA("GeoPMBitRatesA", hstTitleA);
+  mHistPMBitRatesSideC = mChannelGeometry.makeHistSideC("GeoPMBitRatesC", hstTitleC);
+  getObjectsManager()->startPublishing(mHistPMBitRatesSideA.get());
+  getObjectsManager()->setDefaultDrawOptions(mHistPMBitRatesSideA.get(), "TEXT COLZ L");
+  getObjectsManager()->startPublishing(mHistPMBitRatesSideC.get());
+  getObjectsManager()->setDefaultDrawOptions(mHistPMBitRatesSideC.get(), "TEXT COLZ L");
 }
 
 void PostProcTask::update(Trigger trg, framework::ServiceRegistryRef serviceReg)
@@ -162,6 +212,7 @@ void PostProcTask::update(Trigger trg, framework::ServiceRegistryRef serviceReg)
     mHistTriggerRates->Scale(samplePeriod);
   }
   // PM bits
+  double nseminStatTotal{ 0 };
   auto hChDataBits = mPostProcHelper.template getObject<TH2F>("ChannelDataBits");
   auto hStatChannelID = mPostProcHelper.template getObject<TH1F>("StatChannelID");
   mHistChDataNOTbits->Reset();
@@ -173,10 +224,23 @@ void PostProcTask::update(Trigger trg, framework::ServiceRegistryRef serviceReg)
         const double nStatPMbit = hChDataBits->GetBinContent(iBinX, iBinY);
         const double nStatNegPMbit = nStatTotal - nStatPMbit;
         totalStat += nStatNegPMbit;
+        if (iBinY == iBitPM) {
+          mHistChannelPMBit->SetBinContent(iBinX, nStatPMbit);
+          nseminStatTotal += nStatPMbit;
+        }
         mHistChDataNOTbits->SetBinContent(iBinX, iBinY, nStatNegPMbit);
       }
     }
     mHistChDataNOTbits->SetEntries(totalStat);
+    mHistChannelPMBit->SetEntries(nseminStatTotal);
+    mHistPMBitRatesSideA->Reset("content");
+    mHistPMBitRatesSideC->Reset("content");
+    mHistPMBitRatesSideA->SetStats(0);
+    mHistPMBitRatesSideC->SetStats(0);
+    constexpr double factor = 1e3;                                                    // Hz -> kHz
+    const double samplePeriod = 1. / (factor * mPostProcHelper.mCurrSampleLengthSec); // in sec^-1 units
+    mHistChannelPMBit->Scale(samplePeriod);
+    mChannelGeometry.convertHist1D(mHistChannelPMBit.get(), mHistPMBitRatesSideA.get(), mHistPMBitRatesSideC.get());
   }
   // Amplitudes
   auto hAmpPerChannel = mPostProcHelper.template getObject<TH2F>("AmpPerChannel");
@@ -220,14 +284,6 @@ void PostProcTask::update(Trigger trg, framework::ServiceRegistryRef serviceReg)
     std::unique_ptr<TH1D> projInWindow(hTimePerChannel->ProjectionX("projInWindow", hTimePerChannel->GetYaxis()->FindBin(mLowTimeThreshold), hTimePerChannel->GetYaxis()->FindBin(mUpTimeThreshold)));
     std::unique_ptr<TH1D> projFull(hTimePerChannel->ProjectionX("projFull"));
     mHistTimeInWindow->Divide(projInWindow.get(), projFull.get());
-    // hist with channel variables -> geometrical lot with channel variables
-    const double scaleVrtTrg = trgVrtCnts > 0. ? 1. / trgVrtCnts : 0.0;
-    projInWindow->Scale(scaleVrtTrg);
-    mHistStatsSideA->Reset("content");
-    mHistStatsSideC->Reset("content");
-    mHistStatsSideA->SetStats(0);
-    mHistStatsSideC->SetStats(0);
-    mChannelGeometry.convertHist1D(projInWindow.get(), mHistStatsSideA.get(), mHistStatsSideC.get());
   }
 
   if (hAmpPerChannel && hTimePerChannel) {
@@ -246,6 +302,47 @@ void PostProcTask::update(Trigger trg, framework::ServiceRegistryRef serviceReg)
     mTime->GetXaxis()->SetTitleOffset(1);
     mAmpl->GetYaxis()->SetTitleOffset(1);
     mTime->GetYaxis()->SetTitleOffset(1);
+  }
+
+  if (hTimePerChannel && hAmpPerChannel && hTimePerChannel && mPostProcHelper.IsNonEmptySample()) {
+    // hist with channel variables -> geometrical lot with channel variables
+    mHistChannelMapSideA->Reset("content");
+    mHistChannelMapSideC->Reset("content");
+    mHistChannelMapSideA->SetStats(0);
+    mHistChannelMapSideC->SetStats(0);
+    mChannelGeometry.convertHist1D(mHistChannelID.get(), mHistChannelMapSideA.get(), mHistChannelMapSideC.get());
+
+    std::unique_ptr<TH1D> projInWindow(hTimePerChannel->ProjectionX("projInWindow", hTimePerChannel->GetYaxis()->FindBin(mLowTimeThreshold), hTimePerChannel->GetYaxis()->FindBin(mUpTimeThreshold)));
+    const double scaleVrtTrg = trgVrtCnts > 0. ? 1. / trgVrtCnts : 0.0;
+    projInWindow->Scale(scaleVrtTrg);
+    mHistOccupancySideA->Reset("content");
+    mHistOccupancySideC->Reset("content");
+    mHistOccupancySideA->SetStats(0);
+    mHistOccupancySideC->SetStats(0);
+    mChannelGeometry.convertHist1D(projInWindow.get(), mHistOccupancySideA.get(), mHistOccupancySideC.get());
+
+    constexpr double factor = 1e3;                                                    // Hz -> kHz
+    const double samplePeriod = 1. / (factor * mPostProcHelper.mCurrSampleLengthSec); // in sec^-1 units
+    projInWindow->Scale(samplePeriod / scaleVrtTrg);
+    mHistRatesSideA->Reset("content");
+    mHistRatesSideC->Reset("content");
+    mHistRatesSideA->SetStats(0);
+    mHistRatesSideC->SetStats(0);
+    mChannelGeometry.convertHist1D(projInWindow.get(), mHistRatesSideA.get(), mHistRatesSideC.get());
+
+    TH1F* hamp = (TH1F*)hAmpPerChannel->ProfileX();
+    mHistAmplitudeSideA->Reset("content");
+    mHistAmplitudeSideC->Reset("content");
+    mHistAmplitudeSideA->SetStats(0);
+    mHistAmplitudeSideC->SetStats(0);
+    mChannelGeometry.convertHist1D(hamp, mHistAmplitudeSideA.get(), mHistAmplitudeSideC.get());
+
+    TH1F* htime = (TH1F*)hTimePerChannel->ProfileX();
+    mHistTimeSideA->Reset("content");
+    mHistTimeSideC->Reset("content");
+    mHistTimeSideA->SetStats(0);
+    mHistTimeSideC->SetStats(0);
+    mChannelGeometry.convertHist1D(htime, mHistTimeSideA.get(), mHistTimeSideC.get());
   }
 
   auto hBcVsTrg = mPostProcHelper.template getObject<TH2F>("BCvsTriggers");

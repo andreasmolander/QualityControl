@@ -399,7 +399,8 @@
           "numOrbitsInTF": "32",
           "cycleDurationMoName": "CycleDurationNTF",
           "timestampSourceLhcIf": "metadata",
-          "pathDigitQcTask": "FT0/MO/Digits"
+          "pathDigitQcTask": "FT0/MO/Digits",
+          "PMBit": "7"
         },
         "initTrigger": [
           "userorcontrol"
