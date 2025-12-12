@@ -118,8 +118,8 @@ class DigitQcTask final : public TaskInterface
   std::unique_ptr<TH1F> mHistBC;
   std::unique_ptr<TH1F> mHistNchA;
   std::unique_ptr<TH1F> mHistNchC;
-  std::unique_ptr<TH1F> mHistSumAmpA;
-  std::unique_ptr<TH1F> mHistSumAmpC;
+  std::unique_ptr<TH1F> mHistTCMSumAmpA;
+  std::unique_ptr<TH1F> mHistTCMSumAmpC;
   std::unique_ptr<TH1F> mHistAverageTimeA;
   std::unique_ptr<TH1F> mHistAverageTimeC;
   std::unique_ptr<TH1F> mHistChannelID;
@@ -144,6 +144,10 @@ class DigitQcTask final : public TaskInterface
   std::unique_ptr<TH2F> mHistPmTcmSumAmpC;
   std::unique_ptr<TH2F> mHistPmTcmAverageTimeC;
   std::unique_ptr<TH2F> mHistTriggersSoftwareVsTCM;
+
+  std::unique_ptr<TH1F> mHistSumAmpA;
+  std::unique_ptr<TH1F> mHistSumAmpC;
+  std::unique_ptr<TH1F> mHistBCLHCIF;
 
   // Hashed maps
   static const size_t mapSize = 256;

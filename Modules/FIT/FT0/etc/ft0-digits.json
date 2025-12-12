@@ -46,6 +46,9 @@
           "trgOrGate": "153",
           "trgChargeLevelLow": "0",
           "trgChargeLevelHigh": "4095"
+        },
+        "grpGeomRequest" : {
+          "askGRPLHCIF": "true"
         }
       }
     }

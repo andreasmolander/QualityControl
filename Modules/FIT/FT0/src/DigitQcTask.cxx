@@ -18,6 +18,8 @@
 #include "TCanvas.h"
 #include "TROOT.h"
 
+#include "DetectorsBase/GRPGeomHelper.h"
+
 #include "QualityControl/QcInfoLogger.h"
 #include "DataFormatsFIT/Triggers.h"
 #include "Framework/InputRecord.h"
@@ -168,14 +170,18 @@ void DigitQcTask::initialize(o2::framework::InitContext& /*ctx*/)
   mHistTimeSum2Diff->GetYaxis()->SetRangeUser(-5, 5);
   mHistNchA = helper::registerHist<TH1F>(getObjectsManager(), PublicationPolicy::Forever, "COLZ", "NumChannelsA", "Number of channels(TCM), side A;Nch", sNCHANNELS_PM, 0, sNCHANNELS_PM);
   mHistNchC = helper::registerHist<TH1F>(getObjectsManager(), PublicationPolicy::Forever, "COLZ", "NumChannelsC", "Number of channels(TCM), side C;Nch", sNCHANNELS_PM, 0, sNCHANNELS_PM);
-  mHistSumAmpA = helper::registerHist<TH1F>(getObjectsManager(), PublicationPolicy::Forever, "COLZ", "SumAmpA", "Sum of amplitudes(TCM), side A;", 1e4, 0, 1e4);
-  mHistSumAmpC = helper::registerHist<TH1F>(getObjectsManager(), PublicationPolicy::Forever, "COLZ", "SumAmpC", "Sum of amplitudes(TCM), side C;", 1e4, 0, 1e4);
+  mHistTCMSumAmpA = helper::registerHist<TH1F>(getObjectsManager(), PublicationPolicy::Forever, "COLZ", "SumAmpA", "Sum of amplitudes(TCM), side A;", 1e4, 0, 1e4);
+  mHistTCMSumAmpC = helper::registerHist<TH1F>(getObjectsManager(), PublicationPolicy::Forever, "COLZ", "SumAmpC", "Sum of amplitudes(TCM), side C;", 1e4, 0, 1e4);
   mHistAverageTimeA = helper::registerHist<TH1F>(getObjectsManager(), PublicationPolicy::Forever, "COLZ", "AverageTimeA", "Average time(TCM), side A", 4100, -2050, 2050);
   mHistAverageTimeC = helper::registerHist<TH1F>(getObjectsManager(), PublicationPolicy::Forever, "COLZ", "AverageTimeC", "Average time(TCM), side C", 4100, -2050, 2050);
   mHistChannelID = helper::registerHist<TH1F>(getObjectsManager(), PublicationPolicy::Forever, "COLZ", "StatChannelID", "ChannelID statistics;ChannelID", sNCHANNELS_PM, 0, sNCHANNELS_PM);
   mHistCycleDuration = helper::registerHist<TH1D>(getObjectsManager(), PublicationPolicy::Forever, "COLZ", "CycleDuration", "Cycle Duration;;time [ns]", 1, 0, 2);
   mHistCycleDurationNTF = helper::registerHist<TH1D>(getObjectsManager(), PublicationPolicy::Forever, "COLZ", "CycleDurationNTF", "Cycle Duration;;time [TimeFrames]", 1, 0, 2);
   mHistCycleDurationRange = helper::registerHist<TH1D>(getObjectsManager(), PublicationPolicy::Forever, "COLZ", "CycleDurationRange", "Cycle Duration (total cycle range);;time [ns]", 1, 0, 2);
+
+  mHistSumAmpA = helper::registerHist<TH1F>(getObjectsManager(), PublicationPolicy::Forever, "COLZ", "SumAmpAForGlauber", "Sum of amplitudes, side A;", 1e4, 0, 1e4);
+  mHistSumAmpC = helper::registerHist<TH1F>(getObjectsManager(), PublicationPolicy::Forever, "COLZ", "SumAmpCForGlauber", "Sum of amplitudes, side C;", 1e4, 0, 1e4);
+  mHistBCLHCIF = helper::registerHist<TH1F>(getObjectsManager(), PublicationPolicy::Forever, "COLZ", "BCLHCIF", "BC from LHCIF;BC;counts;", sBCperOrbit, 0, sBCperOrbit);
 
   std::vector<unsigned int> vecChannelIDs;
   if (auto param = mCustomParameters.find("ChannelIDs"); param != mCustomParameters.end()) {
@@ -262,8 +268,8 @@ void DigitQcTask::startOfActivity(const Activity& activity)
   mHistOrbit2BC->Reset();
   mHistNchA->Reset();
   mHistNchC->Reset();
-  mHistSumAmpA->Reset();
-  mHistSumAmpC->Reset();
+  mHistTCMSumAmpA->Reset();
+  mHistTCMSumAmpC->Reset();
   mHistAverageTimeA->Reset();
   mHistAverageTimeC->Reset();
   mHistChannelID->Reset();
@@ -287,6 +293,10 @@ void DigitQcTask::startOfActivity(const Activity& activity)
   for (auto& entry : mMapHistAmpVsTime) {
     entry.second->Reset();
   }
+
+  mHistSumAmpA->Reset();
+  mHistSumAmpC->Reset();
+  mHistBCLHCIF->Reset();
 }
 
 void DigitQcTask::startOfCycle()
@@ -301,10 +311,14 @@ void DigitQcTask::startOfCycle()
 
 void DigitQcTask::monitorData(o2::framework::ProcessingContext& ctx)
 {
+  // TODO: Move to init?
+  const auto& bcPattern = o2::base::GRPGeomHelper::instance().getGRPLHCIF()->getBunchFilling();
+  ILOG(Info) << "hi";
   mTFcreationTime = ctx.services().get<o2::framework::TimingInfo>().creation;
   mTfCounter++;
   auto channels = ctx.inputs().get<gsl::span<o2::ft0::ChannelData>>("channels");
   auto digits = ctx.inputs().get<gsl::span<o2::ft0::Digit>>("digits");
+
   if (digits.size() > 0) {
     // Considering that Digit container is already sorted by IR
     const o2::InteractionRecord& firstIR = digits[0].getIntRecord();
@@ -315,6 +329,7 @@ void DigitQcTask::monitorData(o2::framework::ProcessingContext& ctx)
     mTimeMaxNS = std::max(mTimeMaxNS, timeMaxNS);
     mTimeSum += timeMaxNS - timeMinNS;
   }
+
   for (auto& digit : digits) {
     // Exclude all BCs, in which laser signals are expected (and trigger outputs are blocked)
     const auto& vecChData = digit.getBunchChannelData(channels);
@@ -324,6 +339,9 @@ void DigitQcTask::monitorData(o2::framework::ProcessingContext& ctx)
     }
     mHistOrbit2BC->Fill(digit.getIntRecord().orbit % sOrbitsPerTF, digit.getIntRecord().bc);
     mHistBC->Fill(digit.getBC());
+    if (bcPattern.testBC(digit.getBC())) {
+      mHistBCLHCIF->Fill(digit.getBC());
+    }
 
     std::set<uint8_t> setFEEmodules{};
 
@@ -341,10 +359,10 @@ void DigitQcTask::monitorData(o2::framework::ProcessingContext& ctx)
       mapPMhash2sumAmpl.insert({ entry.first, 0 });
     }
     for (const auto& chData : vecChData) {
+      mHistChannelID->Fill(chData.ChId);
       mHistTime2Ch->Fill(static_cast<Double_t>(chData.ChId), static_cast<Double_t>(chData.CFDTime));
       mHistAmp2Ch->Fill(static_cast<Double_t>(chData.ChId), static_cast<Double_t>(chData.QTCAmpl));
       mStateLastIR2Ch[chData.ChId] = digit.mIntRecord;
-      mHistChannelID->Fill(chData.ChId);
       if (mSetAllowedChIDs.size() != 0 && mSetAllowedChIDs.find(static_cast<unsigned int>(chData.ChId)) != mSetAllowedChIDs.end()) {
         mMapHistAmp1D[chData.ChId]->Fill(chData.QTCAmpl);
         mMapHistTime1D[chData.ChId]->Fill(chData.CFDTime);
@@ -416,12 +434,12 @@ void DigitQcTask::monitorData(o2::framework::ProcessingContext& ctx)
     if (isTCM && digit.mTriggers.getDataIsValid() && !digit.mTriggers.getOutputsAreBlocked()) {
       if (digit.mTriggers.getNChanA() > 0) {
         mHistNchA->Fill(digit.mTriggers.getNChanA());
-        mHistSumAmpA->Fill(digit.mTriggers.getAmplA());
+        mHistTCMSumAmpA->Fill(digit.mTriggers.getAmplA());
         mHistAverageTimeA->Fill(digit.mTriggers.getTimeA());
       }
       if (digit.mTriggers.getNChanC() > 0) {
         mHistNchC->Fill(digit.mTriggers.getNChanC());
-        mHistSumAmpC->Fill(digit.mTriggers.getAmplC());
+        mHistTCMSumAmpC->Fill(digit.mTriggers.getAmplC());
         mHistAverageTimeC->Fill(digit.mTriggers.getTimeC());
       }
       mHistPmTcmNchA->Fill(digit.mTriggers.getNChanA(), pmNChanA - digit.mTriggers.getNChanA());
@@ -457,6 +475,15 @@ void DigitQcTask::monitorData(o2::framework::ProcessingContext& ctx)
       const auto status = mTrgValidation.getTrgValidationStatus(trg, tcmEmu.triggersignals, iTrgBit);
       mHistTriggersSoftwareVsTCM->Fill(iTrgBit, status);
     }
+
+    // Fill amplitude histograms for Glauber fits
+    // const auto& bcPattern = mPostProcHelper.getGRPLHCIFData().getBunchFilling();
+    
+    if ((tcmEmu.triggersignals & (1 << o2::fit::Triggers::bitVertex))
+        && (bcPattern.testBC(digit.getBC()))) {
+          mHistSumAmpA->Fill(pmSumAmplA);
+          mHistSumAmpC->Fill(pmSumAmplC);
+      }
     // end of triggers re-computation
   }
 }
@@ -495,8 +522,8 @@ void DigitQcTask::reset()
   mHistOrbit2BC->Reset();
   mHistNchA->Reset();
   mHistNchC->Reset();
-  mHistSumAmpA->Reset();
-  mHistSumAmpC->Reset();
+  mHistTCMSumAmpA->Reset();
+  mHistTCMSumAmpC->Reset();
   mHistAverageTimeA->Reset();
   mHistAverageTimeC->Reset();
   mHistChannelID->Reset();
@@ -528,6 +555,10 @@ void DigitQcTask::reset()
   for (auto& entry : mMapHistAmpVsTime) {
     entry.second->Reset();
   }
+
+  mHistSumAmpA->Reset();
+  mHistSumAmpC->Reset();
+  mHistBCLHCIF->Reset();
 }
 
 } // namespace o2::quality_control_modules::ft0
